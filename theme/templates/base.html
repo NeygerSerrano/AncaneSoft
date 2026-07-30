@@ -1,0 +1,40 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>OdontoQQTA</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    {% tailwind_css %}
+
+    {% block extra_head %}{% endblock %}
+
+    {% block dynamic_colors %}
+    {% if configuracion %}
+    <style>
+        :root {
+            --color-primary: {{ configuracion.color_primario|default:'#1d8797' }};
+            --color-secondary: {{ configuracion.color_secundario|default:'#0f3856' }};
+        }
+    </style>
+    {% else %}
+    <style>
+        :root {
+            --color-primary: #1d8797;
+            --color-secondary: #0f3856;
+        }
+    </style>
+    {% endif %}
+    {% endblock dynamic_colors %}
+</head>
+
+<body class="bg-surface font-body-md text-on-surface">
+    {% block content %}
+    {% endblock content %}
+</body>
+</html>

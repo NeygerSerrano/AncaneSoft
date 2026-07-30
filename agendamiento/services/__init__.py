@@ -1,0 +1,1 @@
+from .citas_service import is_time_slot_available

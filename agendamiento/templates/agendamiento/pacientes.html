@@ -1,0 +1,124 @@
+{% extends 'agendamiento/layouts/base_app.html' %}
+
+{% block sidebar %}
+    {% include 'agendamiento/includes/sidebar.html' with active_tab='pacientes' %}
+{% endblock %}
+
+{% block header_title %}
+    <h2 class="text-headline-md font-bold text-brand-secondary">Gestión de Pacientes</h2>
+{% endblock %}
+
+{% block header_actions %}
+    <!-- Sin botones adicionales porque los pacientes se crean automáticamente al agendar cita -->
+{% endblock %}
+
+{% block page_content %}
+        <div class="bg-white rounded-xl shadow-[0px_4px_12px_rgba(27,67,50,0.06)] overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-surface-container text-on-surface-variant font-bold text-label-md">
+                    <tr>
+                        <th class="px-6 py-4">Documento</th>
+                        <th class="px-6 py-4">Nombre Completo</th>
+                        <th class="px-6 py-4">Teléfono</th>
+                        <th class="px-6 py-4">Entidad</th>
+                        <th class="px-6 py-4 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/30 text-body-md text-on-surface">
+                    {% for p in pacientes %}
+                    <tr class="hover:bg-surface/50 transition-colors">
+                        <td class="px-6 py-4 font-bold">{{ p.tipo_documento }} {{ p.nro_documento }}</td>
+                        <td class="px-6 py-4">{{ p.nombre_completo }}</td>
+                        <td class="px-6 py-4">{{ p.telefono|default:"N/A" }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed font-bold text-label-sm rounded-full">
+                                {{ p.entidad.nombre_entidad }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{% url 'historial_paciente' p.id %}" title="Ver Historial" class="text-brand-primary hover:text-brand-primary/80 transition-colors mr-3 inline-block">
+                                <span class="material-symbols-outlined">history</span>
+                            </a>
+                            {% if request.user.rol.nombre_rol == 'Secretaria' %}
+                            <button title="Editar Paciente" 
+                                onclick="abrirModalEditar({{ p.id }}, '{{ p.nombre_completo|escapejs }}', '{{ p.telefono|default_if_none:""|escapejs }}', '{{ p.correo_electronico|default_if_none:""|escapejs }}', {{ p.entidad_id }})"
+                                class="text-brand-primary hover:text-brand-primary/80 transition-colors">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-on-surface-variant text-label-md">
+                            No hay pacientes registrados en el sistema.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- MODAL EDITAR PACIENTE (Solo Secretaria) -->
+        {% if request.user.rol.nombre_rol == 'Secretaria' %}
+        <div id="editarModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+                <div class="bg-brand-primary p-4 text-white flex justify-between items-center">
+                    <h2 class="text-headline-sm font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined">edit</span> Editar Paciente
+                    </h2>
+                    <button onclick="cerrarModalEditar()" class="text-white/80 hover:text-white">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <form id="formEditarPaciente" method="POST" action="" class="p-6 space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Nombre Completo *</label>
+                        <input type="text" name="nombre_completo" id="edit_nombre" required class="w-full p-2 border border-outline-variant rounded-lg">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Teléfono</label>
+                            <input type="text" name="telefono" id="edit_telefono" class="w-full p-2 border border-outline-variant rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Correo Electrónico</label>
+                            <input type="email" name="correo_electronico" id="edit_correo" class="w-full p-2 border border-outline-variant rounded-lg">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Entidad</label>
+                        <select name="entidad" id="edit_entidad" class="w-full p-2 border border-outline-variant rounded-lg">
+                            {% for entidad in entidades %}
+                                <option value="{{ entidad.id }}">{{ entidad.nombre_entidad }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6 border-t border-outline-variant pt-4">
+                        <button type="button" onclick="cerrarModalEditar()" class="px-4 py-2 bg-surface-variant text-on-surface-variant rounded-lg font-bold">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors font-bold">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <script>
+            function abrirModalEditar(id, nombre, telefono, correo, entidadId) {
+                var form = document.getElementById('formEditarPaciente');
+                form.action = '/pacientes/' + id + '/editar/';
+                
+                document.getElementById('edit_nombre').value = nombre;
+                document.getElementById('edit_telefono').value = telefono;
+                document.getElementById('edit_correo').value = correo;
+                document.getElementById('edit_entidad').value = entidadId;
+                
+                document.getElementById('editarModal').classList.remove('hidden');
+            }
+            
+            function cerrarModalEditar() {
+                document.getElementById('editarModal').classList.add('hidden');
+            }
+        </script>
+        {% endif %}
+{% endblock %}

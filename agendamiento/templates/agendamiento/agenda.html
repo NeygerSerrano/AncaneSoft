@@ -1,0 +1,500 @@
+{% extends 'agendamiento/layouts/base_app.html' %}
+{% load static %}
+
+{% block extra_head %}
+<!-- FullCalendar JS Local -->
+<script src="{% static 'agendamiento/vendor/fullcalendar/index.global.min.js' %}"></script>
+<script src="{% static 'agendamiento/vendor/fullcalendar/es.global.min.js' %}"></script>
+
+<style>
+    /* Tailwind scrollbar styles (same as dashboard) */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+    
+    /* FullCalendar customizations */
+    .fc {
+        background-color: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        box-shadow: 0px 4px 12px rgba(27,67,50,0.06);
+    }
+    .fc .fc-toolbar-title { font-size: 1.25rem; font-weight: 700; color: #121c28; }
+    .fc .fc-button-primary {
+        background-color: var(--color-primary) !important;
+        border-color: var(--color-primary) !important;
+    }
+    .fc .fc-button-primary:hover {
+        opacity: 0.9 !important;
+    }
+</style>
+{% endblock %}
+
+{% block sidebar %}
+    {% include 'agendamiento/includes/sidebar.html' with active_tab='agenda' %}
+{% endblock %}
+
+{% block header_title %}
+    <h2 class="text-headline-md font-bold text-brand-secondary">Agenda</h2>
+{% endblock %}
+
+{% block header_actions %}
+    <!-- Notifications icon -->
+    <button class="text-on-surface-variant hover:text-brand-primary transition-colors">
+        <span class="material-symbols-outlined">notifications</span>
+    </button>
+{% endblock %}
+
+{% block page_content %}
+
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="p-4 mb-2 rounded-lg {% if message.tags == 'error' %}bg-error-container text-on-error-container{% else %}bg-green-100 text-green-800{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- CALENDAR WRAPPER -->
+        <div id="calendar" class="w-full h-[700px]"></div>
+
+<!-- MODAL PARA AGENDAR CITA (Solo Secretaria) -->
+{% if request.user.rol.nombre_rol == 'Secretaria' %}
+<div id="agendamientoModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+        <div class="bg-brand-primary text-white px-6 py-4 flex justify-between items-center">
+            <h2 class="text-headline-sm font-bold">Agendar Nueva Cita</h2>
+            <button onclick="cerrarModal()" class="text-white/80 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'agenda' %}" class="p-6 space-y-4">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Tipo Doc.</label>
+                    <select name="tipo_documento" id="input_tipo_documento" class="w-full p-2 border border-outline-variant rounded-lg">
+                        <option value="CC">Cédula</option>
+                        <option value="TI">T. Identidad</option>
+                        <option value="CE">C. Extranjería</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Número Documento *</label>
+                    <input type="text" name="nro_documento" id="input_nro_documento" required class="w-full p-2 border border-outline-variant rounded-lg" placeholder="Ej: 123456789">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Nombre Completo del Paciente *</label>
+                <input type="text" name="nombre_completo" id="input_nombre_completo" required class="w-full p-2 border border-outline-variant rounded-lg">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Teléfono</label>
+                    <input type="text" name="telefono" id="input_telefono" class="w-full p-2 border border-outline-variant rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Correo Electrónico</label>
+                    <input type="email" name="correo_electronico" id="input_correo" class="w-full p-2 border border-outline-variant rounded-lg">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Entidad</label>
+                <select name="entidad" id="input_entidad" class="w-full p-2 border border-outline-variant rounded-lg">
+                    {% for entidad in entidades %}
+                        <option value="{{ entidad.id }}">{{ entidad.nombre_entidad }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="border-t border-outline-variant my-4 pt-4">
+                <h3 class="text-label-md font-bold mb-3 text-brand-primary">Detalles de la Cita</h3>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Inicio *</label>
+                        <input type="datetime-local" id="fecha_hora_inicio" name="fecha_hora_inicio" required class="w-full p-2 border border-outline-variant rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Fin *</label>
+                        <input type="datetime-local" id="fecha_hora_fin" name="fecha_hora_fin" required class="w-full p-2 border border-outline-variant rounded-lg">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Tipo de Cita *</label>
+                    <select name="tipo_cita" required class="w-full p-2 border border-outline-variant rounded-lg">
+                        <option value="Valoración">Valoración</option>
+                        <option value="Procedimiento">Procedimiento</option>
+                    </select>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Motivo / Notas</label>
+                    <textarea name="motivo_cita" rows="2" class="w-full p-2 border border-outline-variant rounded-lg"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button type="button" onclick="cerrarModal()" class="px-4 py-2 border border-outline-variant rounded-lg text-on-surface-variant hover:bg-surface transition-colors font-bold">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors font-bold">Guardar Cita</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- MODAL DETALLE CITA (Todos los roles) -->
+<div id="detalleModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+        <div class="bg-brand-primary p-4 text-white flex justify-between items-center">
+            <h2 class="text-headline-sm font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined">info</span> Detalles de la Cita
+            </h2>
+            <button onclick="cerrarModalDetalle()" class="text-white/80 hover:text-white">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="mb-4">
+                <p class="text-label-sm text-on-surface-variant font-bold">Paciente</p>
+                <p id="det_paciente" class="text-body-lg text-brand-secondary font-medium"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p class="text-label-sm text-on-surface-variant font-bold">Fecha y Hora</p>
+                    <p id="det_fecha" class="text-body-md text-brand-secondary"></p>
+                </div>
+                <div>
+                    <p class="text-label-sm text-on-surface-variant font-bold">Estado</p>
+                    <p id="det_estado" class="text-body-md text-brand-secondary font-bold"></p>
+                </div>
+            </div>
+            
+            {% if request.user.rol.nombre_rol != 'Recepcionista' %}
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p class="text-label-sm text-on-surface-variant font-bold">Tipo</p>
+                    <p id="det_tipo" class="text-body-md text-brand-secondary"></p>
+                </div>
+                <div>
+                    <p class="text-label-sm text-on-surface-variant font-bold">Teléfono</p>
+                    <p id="det_telefono" class="text-body-md text-brand-secondary"></p>
+                </div>
+            </div>
+            <div class="mb-6">
+                <p class="text-label-sm text-on-surface-variant font-bold">Motivo</p>
+                <p id="det_motivo" class="text-body-md text-brand-secondary bg-gray-50 p-2 rounded-md"></p>
+            </div>
+            {% endif %}
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-outline-variant">
+                <button type="button" onclick="cerrarModalDetalle()" class="px-4 py-2 bg-surface-variant text-on-surface-variant rounded-lg font-bold">Cerrar</button>
+                
+                {% if request.user.rol.nombre_rol == 'Secretaria' %}
+                <button type="button" id="btn_cancelar_cita" class="px-4 py-2 bg-error text-white rounded-lg hover:bg-error-container font-bold transition-colors">Cancelar Cita</button>
+                <button type="button" id="btn_enviar_recordatorio" class="px-4 py-2 bg-brand-secondary text-white rounded-lg hover:bg-brand-primary font-bold transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">mail</span> Enviar Recordatorio
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CANCELAR CITA (Solo Secretaria) -->
+{% if request.user.rol.nombre_rol == 'Secretaria' %}
+<div id="cancelarModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+        <div class="bg-error text-on-error px-6 py-4 flex justify-between items-center">
+            <h2 class="text-headline-sm font-bold">Cancelar Cita</h2>
+            <button onclick="cerrarModalCancelar()" class="text-on-error/80 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form id="formCancelarCita" method="POST" action="" class="p-6 space-y-4">
+            {% csrf_token %}
+            <p class="text-body-md text-on-surface">¿Estás segura de cancelar la cita de <strong id="cancelarNombrePaciente"></strong>?</p>
+            <div>
+                <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Motivo de Cancelación *</label>
+                <textarea name="motivo_cancelacion" required rows="2" class="w-full p-2 border border-outline-variant rounded-lg"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button type="button" onclick="cerrarModalCancelar()" class="px-4 py-2 border border-outline-variant rounded-lg text-on-surface-variant hover:bg-surface font-bold">Volver</button>
+                <button type="submit" class="px-4 py-2 bg-error text-on-error rounded-lg font-bold hover:bg-error-container hover:text-on-error-container transition-colors">Confirmar Cancelación</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- MODAL BLOQUEAR AGENDA (Solo Doctora) -->
+{% if request.user.rol.nombre_rol == 'Doctora' %}
+<div id="bloquearModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+        <div class="bg-surface-variant text-on-surface-variant px-6 py-4 flex justify-between items-center">
+            <h2 class="text-headline-sm font-bold">Bloquear Horario</h2>
+            <button onclick="cerrarModalBloquear()" class="text-on-surface-variant/80 hover:text-on-surface transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'bloquear_agenda' %}" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Inicio</label>
+                    <input type="datetime-local" id="b_fecha_hora_inicio" name="fecha_hora_inicio" readonly class="w-full p-2 border border-outline-variant rounded-lg bg-surface">
+                </div>
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Fin</label>
+                    <input type="datetime-local" id="b_fecha_hora_fin" name="fecha_hora_fin" readonly class="w-full p-2 border border-outline-variant rounded-lg bg-surface">
+                </div>
+            </div>
+            <div>
+                <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Motivo / Título del Bloqueo</label>
+                <input type="text" name="motivo_bloqueo" class="w-full p-2 border border-outline-variant rounded-lg" placeholder="Ej: Reunión médica, Almuerzo...">
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button type="button" onclick="cerrarModalBloquear()" class="px-4 py-2 border border-outline-variant rounded-lg text-on-surface-variant hover:bg-surface font-bold">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-on-surface text-surface rounded-lg font-bold">Bloquear Horario</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    var userRole = "{{ request.user.rol.nombre_rol }}";
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        
+        var isRecepcionista = (userRole === 'Recepcionista');
+        var initialView = isRecepcionista ? 'timeGridDay' : 'timeGridWeek';
+        
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            locale: 'es',
+            initialView: initialView,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: isRecepcionista ? 'timeGridDay' : 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            slotMinTime: '06:00:00',
+            slotMaxTime: '21:00:00',
+            allDaySlot: false,
+            events: '{% url "api_citas" %}',
+            selectable: !isRecepcionista,
+            selectMirror: !isRecepcionista,
+            select: function(info) {
+                if(isRecepcionista) return;
+                
+                var tzoffset = (new Date()).getTimezoneOffset() * 60000;
+                var startStr = (new Date(info.start - tzoffset)).toISOString().slice(0, 16);
+                var endStr = (new Date(info.end - tzoffset)).toISOString().slice(0, 16);
+                
+                if (userRole === 'Secretaria') {
+                    document.getElementById('fecha_hora_inicio').value = startStr;
+                    document.getElementById('fecha_hora_fin').value = endStr;
+                    abrirModal();
+                } else if (userRole === 'Doctora') {
+                    document.getElementById('b_fecha_hora_inicio').value = startStr;
+                    document.getElementById('b_fecha_hora_fin').value = endStr;
+                    abrirModalBloquear();
+                }
+                
+                calendar.unselect();
+            },
+            eventTimeFormat: { 
+                hour: 'numeric',
+                minute: '2-digit',
+                meridiem: 'short'
+            },
+            eventClick: function(info) {
+                var estado = info.event.extendedProps.estado;
+                var title = info.event.title;
+                var eventId = info.event.id;
+                
+                if (eventId.startsWith('bloqueo_')) {
+                    if (userRole === 'Doctora') {
+                        var c = confirm("¿Deseas DESBLOQUEAR este horario: " + title + "?");
+                        if(c) {
+                            var dbId = eventId.split('_')[1];
+                            var form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '/citas/bloqueos/' + dbId + '/desbloquear/';
+                            
+                            var csrf = document.createElement('input');
+                            csrf.type = 'hidden';
+                            csrf.name = 'csrfmiddlewaretoken';
+                            csrf.value = '{{ csrf_token }}';
+                            form.appendChild(csrf);
+                            
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    } else {
+                        alert(title);
+                    }
+                    return;
+                }
+                
+                // Cargar datos en el modal de detalle
+                document.getElementById('det_paciente').innerText = title;
+                document.getElementById('det_fecha').innerText = info.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + ' - ' + info.event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                document.getElementById('det_estado').innerText = estado;
+                
+                if (userRole !== 'Recepcionista') {
+                    document.getElementById('det_tipo').innerText = info.event.extendedProps.tipo_cita || 'N/A';
+                    document.getElementById('det_telefono').innerText = info.event.extendedProps.telefono || 'No registrado';
+                    document.getElementById('det_motivo').innerText = info.event.extendedProps.motivo || 'Sin notas.';
+                }
+                
+                var btnCancelar = document.getElementById('btn_cancelar_cita');
+                var btnRecordatorio = document.getElementById('btn_enviar_recordatorio');
+                
+                if (userRole === 'Secretaria') {
+                    if (estado === 'Cancelada' || estado === 'Atendida') {
+                        btnCancelar.style.display = 'none';
+                        btnRecordatorio.style.display = 'none';
+                    } else {
+                        btnCancelar.style.display = 'block';
+                        btnRecordatorio.style.display = 'flex';
+                        
+                        btnCancelar.onclick = function() {
+                            cerrarModalDetalle();
+                            var dbId = eventId.split('_')[1];
+                            var form = document.getElementById('formCancelarCita');
+                            form.action = '/citas/' + dbId + '/cancelar/';
+                            document.getElementById('cancelarNombrePaciente').innerText = title;
+                            abrirModalCancelar();
+                        };
+                        
+                        btnRecordatorio.onclick = function() {
+                            cerrarModalDetalle();
+                            var dbId = eventId.split('_')[1];
+                            var form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '/citas/' + dbId + '/recordatorio/';
+                            var csrf = document.createElement('input');
+                            csrf.type = 'hidden';
+                            csrf.name = 'csrfmiddlewaretoken';
+                            csrf.value = '{{ csrf_token }}';
+                            form.appendChild(csrf);
+                            document.body.appendChild(form);
+                            form.submit();
+                        };
+                    }
+                }
+                
+                document.getElementById('detalleModal').classList.remove('hidden');
+            },
+            editable: userRole === 'Secretaria',
+            eventDrop: function(info) {
+                if (userRole !== 'Secretaria' || !info.event.id.startsWith('cita_')) {
+                    info.revert();
+                    return;
+                }
+                
+                var estado = info.event.extendedProps.estado;
+                if (estado === 'Cancelada' || estado === 'Atendida') {
+                    alert('No se puede reprogramar una cita ' + estado);
+                    info.revert();
+                    return;
+                }
+                
+                if (confirm("¿Estás segura de reagendar la cita de " + info.event.title + "?")) {
+                    var dbId = info.event.id.split('_')[1];
+                    var tzoffset = (new Date()).getTimezoneOffset() * 60000;
+                    var startStr = (new Date(info.event.start - tzoffset)).toISOString().slice(0, 16);
+                    var endStr = (new Date(info.event.end - tzoffset)).toISOString().slice(0, 16);
+                    
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/citas/' + dbId + '/reagendar/';
+                    
+                    var csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = 'csrfmiddlewaretoken';
+                    csrf.value = '{{ csrf_token }}';
+                    form.appendChild(csrf);
+                    
+                    var startInput = document.createElement('input');
+                    startInput.type = 'hidden';
+                    startInput.name = 'fecha_hora_inicio';
+                    startInput.value = startStr;
+                    form.appendChild(startInput);
+                    
+                    var endInput = document.createElement('input');
+                    endInput.type = 'hidden';
+                    endInput.name = 'fecha_hora_fin';
+                    endInput.value = endStr;
+                    form.appendChild(endInput);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    info.revert();
+                }
+            }
+        });
+        calendar.render();
+        
+        // Auto-refresh para Recepcionista
+        if (isRecepcionista) {
+            setInterval(function() {
+                calendar.refetchEvents();
+            }, 60000);
+        }
+
+        // AJAX para Autocompletado de Pacientes
+        if (userRole === 'Secretaria') {
+            const inputNroDoc = document.getElementById('input_nro_documento');
+            if (inputNroDoc) {
+                inputNroDoc.addEventListener('blur', function() {
+                    const doc = this.value.trim();
+                    if (doc.length > 0) {
+                        fetch(`/api/pacientes/buscar/?nro_documento=${doc}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.encontrado) {
+                                    document.getElementById('input_nombre_completo').value = data.nombre_completo;
+                                    document.getElementById('input_telefono').value = data.telefono || '';
+                                    document.getElementById('input_tipo_documento').value = data.tipo_documento || 'CC';
+                                    document.getElementById('input_correo').value = data.correo_electronico || '';
+                                    if (data.entidad_id) {
+                                        document.getElementById('input_entidad').value = data.entidad_id;
+                                    }
+                                } else {
+                                    document.getElementById('input_nombre_completo').value = '';
+                                    document.getElementById('input_telefono').value = '';
+                                    document.getElementById('input_correo').value = '';
+                                    // Resetear entidad a particular por defecto si existe (normalmente id 1)
+                                    document.getElementById('input_entidad').selectedIndex = 0;
+                                }
+                            })
+                            .catch(err => console.error("Error buscando paciente:", err));
+                    }
+                });
+            }
+        }
+    });
+
+    function abrirModal() { document.getElementById('agendamientoModal').classList.remove('hidden'); }
+    function cerrarModal() { document.getElementById('agendamientoModal').classList.add('hidden'); }
+    
+    function abrirModalCancelar() { document.getElementById('cancelarModal').classList.remove('hidden'); }
+    function cerrarModalCancelar() { document.getElementById('cancelarModal').classList.add('hidden'); }
+    
+    function abrirModalBloquear() { document.getElementById('bloquearModal').classList.remove('hidden'); }
+    function cerrarModalBloquear() { document.getElementById('bloquearModal').classList.add('hidden'); }
+    
+    function cerrarModalDetalle() { document.getElementById('detalleModal').classList.add('hidden'); }
+</script>
+{% endblock page_content %}

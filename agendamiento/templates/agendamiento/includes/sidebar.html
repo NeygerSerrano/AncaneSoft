@@ -1,0 +1,51 @@
+<aside class="fixed left-0 top-0 h-screen w-64 bg-brand-secondary flex flex-col py-6 shadow-sm z-50">
+    <div class="px-6 mb-10">
+        <h1 class="text-headline-md font-bold text-white">{{ configuracion.nombre_clinica|default:'MediQQTA' }}</h1>
+        <!-- <p class="text-label-sm text-white/70">Management Suite</p> -->
+    </div>
+    <nav class="flex-1 space-y-1">
+        <a class="flex items-center gap-3 px-6 py-3 transition-all {% if active_tab == 'dashboard' %}border-l-4 border-white bg-white/10 text-on-primary font-bold{% else %}text-on-primary/70 hover:text-on-primary hover:bg-white/5{% endif %}" href="{% url 'dashboard' %}">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-label-md">Dashboard</span>
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 transition-all {% if active_tab == 'agenda' %}border-l-4 border-white bg-white/10 text-on-primary font-bold{% else %}text-on-primary/70 hover:text-on-primary hover:bg-white/5{% endif %}" href="{% url 'agenda' %}">
+            <span class="material-symbols-outlined">view_agenda</span>
+            <span class="text-label-md">Agenda</span>
+        </a>
+        
+        {% if request.user.rol.nombre_rol in 'Secretaria,Doctora' %}
+        <a class="flex items-center gap-3 px-6 py-3 transition-all {% if active_tab == 'pacientes' %}border-l-4 border-white bg-white/10 text-on-primary font-bold{% else %}text-on-primary/70 hover:text-on-primary hover:bg-white/5{% endif %}" href="{% url 'pacientes' %}">
+            <span class="material-symbols-outlined">group</span>
+            <span class="text-label-md">Pacientes</span>
+        </a>
+        <a class="flex items-center gap-3 px-6 py-3 transition-all {% if active_tab == 'citas' %}border-l-4 border-white bg-white/10 text-on-primary font-bold{% else %}text-on-primary/70 hover:text-on-primary hover:bg-white/5{% endif %}" href="{% url 'citas_list' %}">
+            <span class="material-symbols-outlined">calendar_month</span>
+            <span class="text-label-md">Citas</span>
+        </a>
+        {% endif %}
+        
+        {% if request.user.rol.nombre_rol == 'Doctora' %}
+        <a class="flex items-center gap-3 px-6 py-3 transition-all {% if active_tab == 'reportes' %}border-l-4 border-white bg-white/10 text-on-primary font-bold{% else %}text-on-primary/70 hover:text-on-primary hover:bg-white/5{% endif %}" href="{% url 'reportes' %}">
+            <span class="material-symbols-outlined">analytics</span>
+            <span class="text-label-md">Reportes</span>
+        </a>
+        {% endif %}
+        
+        {% if request.user.rol.nombre_rol != 'Recepcionista' %}
+        <a class="flex items-center gap-3 px-6 py-3 transition-all {% if active_tab == 'configuracion' %}border-l-4 border-white bg-white/10 text-on-primary font-bold{% else %}text-on-primary/70 hover:text-on-primary hover:bg-white/5{% endif %}" href="{% url 'configuracion' %}">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="text-label-md">Configuración</span>
+        </a>
+        {% endif %}
+    </nav>
+    <div class="px-6 pt-6 mt-auto border-t border-white/10 space-y-1">
+        <a class="flex items-center gap-3 py-3 transition-all {% if active_tab == 'soporte' %}text-on-primary font-bold{% else %}text-on-primary/70 hover:text-on-primary{% endif %}" href="{% url 'soporte' %}">
+            <span class="material-symbols-outlined">help</span>
+            <span class="text-label-md">Soporte</span>
+        </a>
+        <a class="flex items-center gap-3 py-3 text-on-primary/70 hover:text-on-primary transition-colors" href="{% url 'logout' %}">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="text-label-md font-bold">Cerrar Sesión</span>
+        </a>
+    </div>
+</aside>

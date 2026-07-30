@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex overflow-hidden w-full min-h-screen bg-surface">
+    <!-- SIDEBAR -->
+    {% block sidebar %}
+        {% include 'agendamiento/includes/sidebar.html' with active_tab='dashboard' %}
+    {% endblock %}
+
+    <main class="ml-64 flex-1 h-screen overflow-y-auto bg-surface-bright p-8 relative">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                {% block header_title %}
+                <h2 class="text-headline-md font-bold text-brand-secondary">Título</h2>
+                {% endblock %}
+            </div>
+            
+            <div class="flex items-center gap-6">
+                {% block header_actions %}
+                {% endblock %}
+                
+                {% block header_divider %}
+                <div class="hidden sm:block border-l border-outline-variant h-8"></div>
+                {% endblock %}
+                
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p class="font-bold text-label-md text-brand-secondary">{{ user.first_name }} {{ user.last_name }}</p>
+                        <p class="text-label-sm text-brand-secondary/80">{{ user.rol.nombre_rol }}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center font-bold text-brand-primary uppercase">
+                        {{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="p-4 mb-2 rounded-lg {% if message.tags == 'error' %}bg-error-container text-on-error-container{% else %}bg-green-100 text-green-800{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block page_content %}
+        {% endblock %}
+    </main>
+</div>
+{% endblock %}

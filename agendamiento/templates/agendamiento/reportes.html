@@ -1,0 +1,78 @@
+{% extends 'agendamiento/layouts/base_app.html' %}
+
+{% block sidebar %}
+    {% include 'agendamiento/includes/sidebar.html' with active_tab='reportes' %}
+{% endblock %}
+
+{% block header_title %}
+    <h2 class="text-headline-md font-bold text-brand-secondary">Reportes Mensuales</h2>
+    <p class="text-body-md text-brand-secondary/80 mt-1">Genera y descarga informes de productividad y estados de citas.</p>
+{% endblock %}
+
+{% block header_actions %}
+{% endblock %}
+
+{% block page_content %}
+
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-error-container text-on-error-container{% else %}bg-green-100 text-green-800{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-outline-variant max-w-3xl">
+            <!-- Selector de Mes -->
+            <form method="GET" action="{% url 'reportes' %}" class="flex items-end gap-4 mb-8">
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Seleccionar Mes</label>
+                    <input type="month" name="mes" value="{{ mes_str }}" class="px-4 py-2 border border-outline-variant rounded-lg bg-surface focus:outline-none focus:ring-2 focus:ring-primary-container">
+                </div>
+                <button type="submit" class="px-6 py-2 bg-surface-variant text-on-surface-variant font-bold rounded-lg hover:bg-surface-container transition-colors">
+                    Actualizar Datos
+                </button>
+            </form>
+
+            {% if total_citas > 0 %}
+            <!-- Resumen de Métricas -->
+            <div class="grid grid-cols-4 gap-4 mb-8">
+                <div class="bg-surface p-4 rounded-xl text-center border border-outline-variant">
+                    <p class="text-label-sm text-on-surface-variant font-bold">Total Citas</p>
+                    <p class="text-headline-sm font-bold text-on-surface">{{ total_citas }}</p>
+                </div>
+                <div class="bg-primary-fixed/20 p-4 rounded-xl text-center border border-primary-fixed">
+                    <p class="text-label-sm text-on-primary-fixed-variant font-bold">Atendidas</p>
+                    <p class="text-headline-sm font-bold text-on-primary-container">{{ totales.Atendida|default:"0" }}</p>
+                </div>
+                <div class="bg-error-container/20 p-4 rounded-xl text-center border border-error-container">
+                    <p class="text-label-sm text-error font-bold">Canceladas</p>
+                    <p class="text-headline-sm font-bold text-error">{{ totales.Cancelada|default:"0" }}</p>
+                </div>
+                <div class="bg-surface p-4 rounded-xl text-center border border-outline-variant">
+                    <p class="text-label-sm text-on-surface-variant font-bold">Reprogramadas</p>
+                    <p class="text-headline-sm font-bold text-on-surface">{{ totales.Reprogramada|default:"0" }}</p>
+                </div>
+            </div>
+
+            <!-- Exportar -->
+            <div class="flex gap-4">
+                <a href="{% url 'exportar_reporte_excel' %}?mes={{ mes_str }}" class="flex items-center gap-2 px-6 py-3 bg-primary-container text-white font-bold rounded-lg hover:bg-primary transition-colors">
+                    <span class="material-symbols-outlined">download</span>
+                    Descargar Excel Completo
+                </a>
+                <a href="{% url 'exportar_reporte_excel' %}?mes={{ mes_str }}&estado=Cancelada" class="flex items-center gap-2 px-6 py-3 bg-error text-white font-bold rounded-lg hover:bg-error-container transition-colors">
+                    <span class="material-symbols-outlined">download</span>
+                    Excel Solo Canceladas
+                </a>
+            </div>
+            {% else %}
+            <div class="text-center py-12 bg-surface rounded-xl">
+                <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">inbox</span>
+                <p class="text-body-lg text-on-surface-variant">No se encontraron registros de citas para el periodo seleccionado ({{ mes_str }}).</p>
+            </div>
+            {% endif %}
+        </div>
+{% endblock page_content %}

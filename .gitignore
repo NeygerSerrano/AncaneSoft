@@ -1,0 +1,19 @@
+# Archivo: .gitignore (en la raíz del proyecto)
+
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de base de datos local (por si usas SQLite alguna vez)
+db.sqlite3
+*.sqlite3
+
+# Archivos del sistema operativo (Mac/Windows)
+.DS_Store
+Thumbs.db

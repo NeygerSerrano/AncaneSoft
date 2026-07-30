@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block dynamic_colors %}
+<style>
+    :root {
+        --color-primary: #1d8797;
+        --color-secondary: #0f3856;
+    }
+</style>
+{% endblock dynamic_colors %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop bg-gray-50">
+<main class="w-full max-w-[1024px] bg-white rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row">
+    <!-- Left Side: Branding / Visual -->
+    <div class="hidden md:flex flex-col justify-between w-1/2 text-white p-12 relative overflow-hidden group bg-brand-secondary">
+        <div class="relative z-10 flex flex-col items-center text-center">
+            <img alt="Logo" class="h-48 w-auto mb-8 rounded-md" src="{% static 'agendamiento/img/logoqqta.png' %}">
+            <h1 class="font-headline-lg text-headline-lg text-white mb-4">OdontoQQTA.</h1>
+            <p class="font-body-lg text-body-lg text-white">Sistema de agendamiento de citas.</p>
+        </div>
+        <div class="relative z-10 flex items-center gap-2 mt-auto">
+            <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+            <span class="font-label-sm text-label-sm text-white">HIPAA Compliant &amp; Secure</span>
+        </div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
+        <div class="absolute -top-12 -left-12 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+    </div>
+    
+    <!-- Right Side: Login Form -->
+    <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-white">
+        <!-- Mobile Header Logo (visible only on small screens) -->
+        <div class="md:hidden flex items-center justify-center mb-8">
+            <img alt="Logo" class="h-32 w-auto rounded-md" src="{% static 'agendamiento/img/logoqqta.png' %}">
+        </div>
+        <div class="mb-8">
+            <h2 class="font-headline-md text-headline-md text-brand-secondary mb-2">Bienvenido de nuevo</h2>
+            <p class="font-body-md text-body-md text-gray-500">Por favor ingresa tus datos para acceder al sistema.</p>
+        </div>
+
+        {% if messages %}
+            <div class="mb-4 p-4 rounded-md bg-error-container text-on-error-container">
+                {% for message in messages %}
+                    <p class="font-body-md text-body-md">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form class="space-y-6" method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <!-- Username / Document Field -->
+            <div>
+                <label class="block font-label-md text-label-md text-brand-secondary mb-2" for="nro_documento">Número de Documento</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-brand-primary" style="font-variation-settings: 'FILL' 0;">badge</span>
+                    <input class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-md font-body-md text-gray-800 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors" id="nro_documento" name="nro_documento" placeholder="Ej: 123456789" type="text" required>
+                </div>
+            </div>
+            
+            <!-- Password Field -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block font-label-md text-label-md text-brand-secondary" for="password">Contraseña</label>
+                    <a class="font-label-sm text-label-sm text-brand-primary hover:text-brand-primary/80 transition-colors" href="#">¿Olvidaste tu contraseña?</a>
+                </div>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-brand-primary" style="font-variation-settings: 'FILL' 0;">lock</span>
+                    <input class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-md font-body-md text-gray-800 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors" id="password" name="password" placeholder="••••••••" type="password" required>
+                </div>
+            </div>
+            
+            <!-- Remember Me -->
+            <div class="flex items-center">
+                <input class="h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded cursor-pointer" id="remember-me" name="remember-me" type="checkbox">
+                <label class="ml-2 block font-body-md text-body-md text-gray-500 cursor-pointer" for="remember-me">
+                    Recordarme por 30 días
+                </label>
+            </div>
+            
+            <!-- Login Button -->
+            <button class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm font-label-md text-label-md text-white bg-brand-primary hover:bg-brand-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-colors" type="submit">
+                Ingresar al Sistema
+                <span class="material-symbols-outlined ml-2 text-[18px]" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+            </button>
+        </form>
+        
+        <div class="mt-8 pt-6 border-t border-surface-variant text-center">
+            <p class="font-body-md text-body-md text-gray-500">
+                ¿Necesitas soporte técnico? <a class="font-label-md text-label-md text-brand-primary hover:text-brand-primary/80 transition-colors" href="#">Contactar Soporte</a>
+            </p>
+        </div>
+    </div>
+</main>
+</div>
+{% endblock content %}

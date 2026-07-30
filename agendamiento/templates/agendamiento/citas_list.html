@@ -1,0 +1,59 @@
+{% extends 'agendamiento/layouts/base_app.html' %}
+
+{% block sidebar %}
+    {% include 'agendamiento/includes/sidebar.html' with active_tab='citas' %}
+{% endblock %}
+
+{% block header_title %}
+    <h2 class="text-headline-md font-bold text-brand-secondary">Historial de Citas</h2>
+{% endblock %}
+
+{% block header_actions %}
+    <a href="{% url 'agenda' %}" class="bg-brand-primary text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-brand-primary/90 transition-colors">
+        <span class="material-symbols-outlined">add</span>
+        Agendar Nueva
+    </a>
+{% endblock %}
+
+{% block page_content %}
+        <div class="bg-white rounded-xl shadow-[0px_4px_12px_rgba(27,67,50,0.06)] overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-surface-container text-on-surface-variant font-bold text-label-md">
+                    <tr>
+                        <th class="px-6 py-4">Fecha y Hora</th>
+                        <th class="px-6 py-4">Paciente</th>
+                        <th class="px-6 py-4">Tipo</th>
+                        <th class="px-6 py-4">Agendado Por</th>
+                        <th class="px-6 py-4">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/30 text-body-md text-on-surface">
+                    {% for c in citas %}
+                    <tr class="hover:bg-surface/50 transition-colors">
+                        <td class="px-6 py-4 font-bold">{{ c.fecha_hora_inicio|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4">{{ c.paciente.nombre_completo }}</td>
+                        <td class="px-6 py-4">{{ c.tipo_cita }}</td>
+                        <td class="px-6 py-4 text-on-surface-variant text-sm">{{ c.usuario_agendo.first_name }}</td>
+                        <td class="px-6 py-4">
+                            {% if c.estado == 'Programada' %}
+                            <span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant font-bold text-label-sm rounded-full">Programada</span>
+                            {% elif c.estado == 'Atendida' %}
+                            <span class="px-3 py-1 bg-green-100 text-green-800 font-bold text-label-sm rounded-full">Atendida</span>
+                            {% elif c.estado == 'Cancelada' %}
+                            <span class="px-3 py-1 bg-error-container text-on-error-container font-bold text-label-sm rounded-full">Cancelada</span>
+                            {% else %}
+                            <span class="px-3 py-1 bg-gray-100 text-gray-800 font-bold text-label-sm rounded-full">{{ c.estado }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-on-surface-variant text-label-md">
+                            No hay citas registradas en el sistema.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+{% endblock %}

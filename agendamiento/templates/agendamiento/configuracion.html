@@ -1,0 +1,108 @@
+{% extends 'agendamiento/layouts/base_app.html' %}
+
+{% block sidebar %}
+    {% include 'agendamiento/includes/sidebar.html' with active_tab='configuracion' %}
+{% endblock %}
+
+{% block header_title %}
+    <h2 class="text-headline-md font-bold text-brand-secondary">Configuración de la Cuenta</h2>
+    <p class="text-body-md text-brand-secondary/80 mt-1">Visualiza los datos de tu perfil de usuario y del sistema.</p>
+{% endblock %}
+
+{% block header_actions %}
+{% endblock %}
+
+{% block page_content %}
+        <div class="bg-white rounded-xl shadow-[0px_4px_12px_rgba(27,67,50,0.06)] p-8 max-w-3xl">
+            <div class="flex items-center gap-6 mb-8 pb-8 border-b border-outline-variant/30">
+                <div class="w-24 h-24 rounded-full bg-surface-container flex items-center justify-center font-bold text-headline-lg text-primary-container">
+                    {{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}
+                </div>
+                <div>
+                    <h3 class="text-headline-sm font-bold text-on-surface">{{ user.first_name }} {{ user.last_name }}</h3>
+                    <p class="text-label-md text-on-surface-variant">{{ user.rol.nombre_rol }}</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Tipo de Documento</label>
+                    <p class="text-body-lg font-medium text-on-surface">{{ user.tipo_documento|default:"N/A" }}</p>
+                </div>
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Número de Documento</label>
+                    <p class="text-body-lg font-medium text-on-surface">{{ user.nro_documento }}</p>
+                </div>
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Nombre de Usuario</label>
+                    <p class="text-body-lg font-medium text-on-surface">{{ user.username }}</p>
+                </div>
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1">Estado</label>
+                    <p class="text-body-lg font-medium text-green-600 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">check_circle</span> Activo
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-outline-variant/30">
+                <button class="bg-surface-container text-on-surface-variant px-6 py-2 rounded-lg font-bold hover:bg-surface-dim transition-colors cursor-not-allowed opacity-70">
+                    Cambiar Contraseña
+                </button>
+                <p class="text-label-sm text-on-surface-variant mt-2">La modificación de contraseña por el usuario estará disponible próximamente.</p>
+            </div>
+        </div>
+
+        <!-- System Configuration (Colors) -->
+        <div class="bg-white rounded-xl shadow-[0px_4px_12px_rgba(27,67,50,0.06)] p-8 max-w-3xl mt-8">
+            <header class="mb-6">
+                <h3 class="text-headline-sm font-bold text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-brand-primary">palette</span>
+                    Personalización de Interfaz
+                </h3>
+                <p class="text-body-md text-on-surface-variant mt-1">Ajusta los colores corporativos del sistema.</p>
+            </header>
+            
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'configuracion' %}" class="space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-label-sm font-bold text-on-surface-variant mb-1" for="nombre_clinica">Nombre de la Clínica</label>
+                    <input type="text" id="nombre_clinica" name="nombre_clinica" value="{{ configuracion.nombre_clinica|default:'MediQQTA' }}" class="w-full px-4 py-2 bg-surface border border-outline-variant rounded-md font-body-md text-on-surface focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-label-sm font-bold text-on-surface-variant mb-1" for="color_primario">Color Primario (Acentos, Botones)</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" id="color_primario" name="color_primario" value="{{ configuracion.color_primario|default:'#1d8797' }}" class="h-10 w-16 p-1 bg-white border border-outline-variant rounded-md cursor-pointer">
+                            <span class="text-body-md text-on-surface-variant font-mono">{{ configuracion.color_primario|default:'#1d8797' }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-label-sm font-bold text-on-surface-variant mb-1" for="color_secundario">Color Secundario (Sidebar, Menús)</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" id="color_secundario" name="color_secundario" value="{{ configuracion.color_secundario|default:'#0f3856' }}" class="h-10 w-16 p-1 bg-white border border-outline-variant rounded-md cursor-pointer">
+                            <span class="text-body-md text-on-surface-variant font-mono">{{ configuracion.color_secundario|default:'#0f3856' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="bg-brand-primary hover:bg-brand-primary/90 text-white px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">save</span>
+                        Guardar Personalización
+                    </button>
+                </div>
+            </form>
+        </div>
+{% endblock page_content %}

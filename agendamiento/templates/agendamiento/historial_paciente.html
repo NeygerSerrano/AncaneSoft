@@ -1,0 +1,64 @@
+{% extends 'agendamiento/layouts/base_app.html' %}
+
+{% block sidebar %}
+    {% include 'agendamiento/includes/sidebar.html' with active_tab='pacientes' %}
+{% endblock %}
+
+{% block header_title %}
+    <a href="{% url 'pacientes' %}" class="flex items-center text-brand-primary hover:text-brand-primary/80 transition-colors font-bold mb-2">
+        <span class="material-symbols-outlined mr-1">arrow_back</span>
+        Volver a Pacientes
+    </a>
+    <h2 class="text-headline-md font-bold text-brand-secondary">Historial Clínico: {{ paciente.nombre_completo }}</h2>
+    <p class="text-label-md text-brand-secondary/80 mt-1">{{ paciente.tipo_documento }} {{ paciente.nro_documento }} | Tel: {{ paciente.telefono|default:"N/A" }} | Entidad: {{ paciente.entidad.nombre_entidad }}</p>
+{% endblock %}
+
+{% block header_actions %}
+{% endblock %}
+
+{% block page_content %}
+        <div class="bg-white rounded-xl shadow-[0px_4px_12px_rgba(27,67,50,0.06)] overflow-hidden p-6">
+            <h3 class="text-headline-sm font-bold text-brand-secondary mb-6 border-b border-outline-variant pb-2">Registro de Citas</h3>
+            
+            <div class="relative border-l-2 border-brand-primary/30 ml-4 space-y-8">
+                {% for cita in citas %}
+                <div class="relative pl-6">
+                    <!-- Timeline Dot -->
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-4 border-white 
+                        {% if cita.estado == 'Cancelada' %}bg-error
+                        {% elif cita.estado == 'Reprogramada' %}bg-brand-secondary
+                        {% elif cita.estado == 'Atendida' %}bg-brand-primary
+                        {% else %}bg-brand-primary/50{% endif %}">
+                    </div>
+                    
+                    <div class="bg-surface p-4 rounded-lg shadow-sm border border-outline-variant/30">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-label-md font-bold text-brand-secondary">{{ cita.fecha_hora_inicio|date:"d M Y, H:i" }}</h4>
+                                <p class="text-label-sm text-brand-primary mt-1 font-bold">{{ cita.tipo_cita }}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-label-sm font-medium 
+                                {% if cita.estado == 'Cancelada' %}bg-error-container text-on-error-container
+                                {% elif cita.estado == 'Reprogramada' %}bg-brand-secondary/10 text-brand-secondary
+                                {% elif cita.estado == 'Atendida' %}bg-brand-primary/10 text-brand-primary
+                                {% else %}bg-surface-variant text-on-surface-variant{% endif %}">
+                                {{ cita.estado }}
+                            </span>
+                        </div>
+                        <p class="text-body-md text-on-surface-variant mt-2"><strong>Motivo:</strong> {{ cita.motivo_cita|default:"No especificado" }}</p>
+                        {% if cita.estado == 'Cancelada' and cita.motivo_cancelacion %}
+                            <p class="text-body-md text-error mt-2"><strong>Motivo de Cancelación:</strong> {{ cita.motivo_cancelacion }}</p>
+                        {% endif %}
+                        <div class="mt-3 text-label-sm text-on-surface-variant/70 text-right">
+                            Agendado por: {{ cita.usuario_agendo.get_full_name|default:cita.usuario_agendo.username }}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="pl-6 text-on-surface-variant">
+                    <p>No existen registros de citas para este paciente.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+{% endblock page_content %}
