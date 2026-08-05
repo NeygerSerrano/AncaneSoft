@@ -6,7 +6,7 @@
 
 {% block header_title %}
     <h2 class="text-headline-md font-bold text-brand-secondary">Configuración de la Cuenta</h2>
-    <p class="text-body-md text-brand-secondary/80 mt-1">Visualiza los datos de tu perfil de usuario y del sistema.</p>
+    <!-- <p class="text-body-md text-brand-secondary/80 mt-1">Visualiza los datos de tu perfil de usuario y del sistema.</p> -->
 {% endblock %}
 
 {% block header_actions %}
@@ -73,6 +73,7 @@
                 </div>
             {% endif %}
 
+            {% if request.user.is_superuser %}
             <form method="post" action="{% url 'configuracion' %}" class="space-y-6">
                 {% csrf_token %}
                 <div>
@@ -104,5 +105,12 @@
                     </button>
                 </div>
             </form>
+            {% else %}
+            <div class="bg-surface-variant/30 rounded-lg p-6 text-center border border-outline-variant/30">
+                <span class="material-symbols-outlined text-[48px] text-on-surface-variant/50 mb-3 block">lock</span>
+                <h4 class="text-label-lg font-bold text-on-surface-variant mb-2">Acceso Restringido</h4>
+                <p class="text-body-md text-on-surface-variant">Solo un usuario Superadministrador tiene los privilegios necesarios para modificar el nombre y los colores del sistema.</p>
+            </div>
+            {% endif %}
         </div>
 {% endblock page_content %}

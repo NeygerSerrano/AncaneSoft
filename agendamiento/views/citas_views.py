@@ -1,12 +1,63 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils.timezone import is_aware, make_aware, get_current_timezone
+from django.utils.timezone import is_aware, make_aware, get_current_timezone, now
 from django.utils.dateparse import parse_datetime
 from django.http import JsonResponse
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from email.mime.image import MIMEImage
+import os
+import threading
+from django.conf import settings
 from ..models import Cita, Paciente, BloqueoAgenda, LogAuditoria, Entidad
 from ..services import is_time_slot_available
 from ..decorators import rol_requerido
+
+class EmailThread(threading.Thread):
+    def __init__(self, email):
+        self.email = email
+        threading.Thread.__init__(self)
+
+    def run(self):
+        try:
+            self.email.send()
+        except Exception as e:
+            print(f"Error enviando correo asíncrono: {e}")
+
+def enviar_correo_html_async(asunto, titulo, paciente_nombre, mensaje_principal, tipo_cita, fecha_hora, destinatario):
+    try:
+        html_content = render_to_string('agendamiento/emails/correo_cita.html', {
+            'asunto': asunto,
+            'titulo': titulo,
+            'nombre_paciente': paciente_nombre,
+            'mensaje_principal': mensaje_principal,
+            'tipo_cita': tipo_cita,
+            'fecha_hora': fecha_hora,
+        })
+        text_content = f"Hola {paciente_nombre},\n\n{mensaje_principal}\n\nTipo de cita: {tipo_cita}\nFecha y hora: {fecha_hora}\n\n¡Te esperamos!"
+        email = EmailMultiAlternatives(
+            asunto,
+            text_content,
+            settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@mediqqta.com',
+            [destinatario]
+        )
+        email.attach_alternative(html_content, "text/html")
+        
+        logo_path = os.path.join(settings.BASE_DIR, 'agendamiento', 'static', 'agendamiento', 'img', 'AncaneSoftv2.png')
+        if os.path.exists(logo_path):
+            with open(logo_path, 'rb') as f:
+                logo_data = f.read()
+            logo = MIMEImage(logo_data)
+            logo.add_header('Content-ID', '<logo>')
+            logo.add_header('Content-Disposition', 'inline', filename='AncaneSoftv2.png')
+            email.attach(logo)
+            
+        EmailThread(email).start()
+        return True
+    except Exception as e:
+        print(f"Error preparando correo HTML: {e}")
+        return False
 
 def agenda_view(request):
     if not request.user.is_authenticated:
@@ -65,6 +116,10 @@ def agenda_view(request):
         if not is_aware(fecha_fin):
             fecha_fin = make_aware(fecha_fin, get_current_timezone())
             
+        if fecha_inicio < now():
+            messages.error(request, "No se pueden agendar citas en fechas u horas pasadas.")
+            return redirect('agenda')
+            
         disponible, msg = is_time_slot_available(fecha_inicio, fecha_fin)
         if not disponible:
             messages.error(request, f"No se pudo agendar: {msg}")
@@ -88,16 +143,13 @@ def agenda_view(request):
             detalles='Cita agendada desde el calendario.'
         )
         
-        # ENVIAR EMAIL DE CONFIRMACIÓN
+        # ENVIAR EMAIL DE CONFIRMACIÓN (ASÍNCRONO)
         if paciente.correo_electronico:
-            from django.core.mail import send_mail
-            from django.conf import settings
-            asunto = f"Confirmación de Cita - MediQQTA"
-            mensaje = f"Hola {paciente.nombre_completo},\n\nTu cita de {tipo_cita} ha sido agendada con éxito para el día {fecha_inicio.strftime('%Y-%m-%d a las %H:%M')}.\n\n¡Te esperamos!"
-            try:
-                send_mail(asunto, mensaje, settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@mediqqta.com', [paciente.correo_electronico])
-            except Exception as e:
-                print("Error enviando correo:", e)
+            asunto = "Confirmación de Cita - AncaneSoft"
+            titulo = "¡Cita Confirmada!"
+            mensaje_principal = "Tu cita ha sido agendada con éxito."
+            fecha_str = fecha_inicio.strftime('%Y-%m-%d a las %H:%M')
+            enviar_correo_html_async(asunto, titulo, paciente.nombre_completo, mensaje_principal, tipo_cita, fecha_str, paciente.correo_electronico)
         
         messages.success(request, 'Cita agendada correctamente.')
         return redirect('agenda')
@@ -108,6 +160,15 @@ def agenda_view(request):
 @login_required
 def api_citas(request):
     from ..models import ConfiguracionSistema
+    from django.utils.timezone import now
+    
+    # Auto-completar citas pasadas que no fueron marcadas
+    hoy = now().date()
+    Cita.objects.filter(
+        fecha_hora_inicio__date__lt=hoy, 
+        estado__in=['Programada', 'Reprogramada']
+    ).update(estado='Atendida')
+    
     
     start = request.GET.get('start')
     end = request.GET.get('end')
@@ -122,8 +183,11 @@ def api_citas(request):
         citas = citas.filter(fecha_hora_inicio__gte=start, fecha_hora_fin__lte=end)
         
     for cita in citas:
+        class_names = []
         if cita.estado == 'Cancelada':
             color = '#ef4444' # Rojo para canceladas
+        elif cita.estado == 'Atendida':
+            color = '#16a34a' # Verde para atendidas
         else:
             color = color_primario if cita.tipo_cita == 'Valoración' else color_secundario
             
@@ -144,6 +208,7 @@ def api_citas(request):
             'start': cita.fecha_hora_inicio.isoformat(),
             'end': cita.fecha_hora_fin.isoformat(),
             'color': color,
+            'classNames': class_names,
             'extendedProps': extended_props
         })
         
@@ -157,7 +222,7 @@ def api_citas(request):
             'title': f'BLOQUEO: {bloqueo.motivo_bloqueo or "No disponible"}',
             'start': bloqueo.fecha_hora_inicio.isoformat(),
             'end': bloqueo.fecha_hora_fin.isoformat(),
-            'color': '#717973',
+            'color': '#1f2937',
             'display': 'background'
         })
         
@@ -166,8 +231,36 @@ def api_citas(request):
 @login_required
 @rol_requerido(['Secretaria', 'Doctora'])
 def citas_list_view(request):
+    from django.db.models import Q
+    from django.utils.timezone import now
+    
+    # Auto-completar citas pasadas
+    hoy = now().date()
+    Cita.objects.filter(
+        fecha_hora_inicio__date__lt=hoy, 
+        estado__in=['Programada', 'Reprogramada']
+    ).update(estado='Atendida')
+
     citas = Cita.objects.all().select_related('paciente', 'usuario_agendo').order_by('-fecha_hora_inicio')
-    return render(request, 'agendamiento/citas_list.html', {'citas': citas})
+    
+    q = request.GET.get('q')
+    mes = request.GET.get('mes')
+    
+    if q:
+        citas = citas.filter(
+            Q(paciente__nombre_completo__icontains=q) |
+            Q(tipo_cita__icontains=q) |
+            Q(estado__icontains=q)
+        )
+        
+    if mes:
+        citas = citas.filter(fecha_hora_inicio__month=mes)
+        
+    return render(request, 'agendamiento/citas_list.html', {
+        'citas': citas,
+        'q': q,
+        'mes': mes
+    })
 
 @login_required
 @rol_requerido(['Secretaria'])
@@ -188,6 +281,15 @@ def cancelar_cita_view(request, cita_id):
                 detalles=f'Cita cancelada. Motivo: {motivo}'
             )
             
+            # ENVIAR EMAIL DE CANCELACIÓN (ASÍNCRONO)
+            if cita.paciente.correo_electronico:
+                from django.utils import timezone
+                asunto = "Cita Cancelada - AncaneSoft"
+                titulo = "Cita Cancelada"
+                mensaje_principal = f"Te informamos que tu cita ha sido cancelada.<br><br><strong>Motivo:</strong> {motivo}"
+                fecha_cancelacion_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d a las %H:%M')
+                enviar_correo_html_async(asunto, titulo, cita.paciente.nombre_completo, mensaje_principal, cita.tipo_cita, fecha_cancelacion_str, cita.paciente.correo_electronico)
+            
             messages.success(request, 'Cita cancelada con éxito.')
         except Cita.DoesNotExist:
             messages.error(request, 'Cita no encontrada.')
@@ -201,17 +303,43 @@ def enviar_recordatorio_view(request, cita_id):
         try:
             cita = Cita.objects.select_related('paciente').get(id=cita_id)
             if cita.paciente.correo_electronico:
-                from django.core.mail import send_mail
-                from django.conf import settings
-                asunto = f"Recordatorio de Cita - MediQQTA"
-                mensaje = f"Hola {cita.paciente.nombre_completo},\n\nTe recordamos tu cita de {cita.tipo_cita} agendada para el día {cita.fecha_hora_inicio.strftime('%Y-%m-%d a las %H:%M')}.\n\n¡Te esperamos!"
-                try:
-                    send_mail(asunto, mensaje, settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@mediqqta.com', [cita.paciente.correo_electronico])
-                    messages.success(request, 'Recordatorio enviado con éxito al paciente.')
-                except Exception as e:
-                    messages.error(request, f'Error al enviar recordatorio: {e}')
+                asunto = "Recordatorio de Cita - AncaneSoft"
+                titulo = "¡Recordatorio de Cita!"
+                mensaje_principal = "Te recordamos que tienes una cita programada con nosotros."
+                fecha_str = cita.fecha_hora_inicio.strftime('%Y-%m-%d a las %H:%M')
+                enviado = enviar_correo_html_async(asunto, titulo, cita.paciente.nombre_completo, mensaje_principal, cita.tipo_cita, fecha_str, cita.paciente.correo_electronico)
+                
+                if enviado:
+                    messages.success(request, 'Recordatorio enviado con éxito (en proceso).')
+                else:
+                    messages.error(request, 'Error al enviar recordatorio. Hubo un problema con la conexión de correo.')
             else:
                 messages.error(request, 'El paciente no tiene un correo electrónico registrado.')
+        except Cita.DoesNotExist:
+            messages.error(request, 'Cita no encontrada.')
+            
+    return redirect('agenda')
+
+@login_required
+@rol_requerido(['Secretaria'])
+def atender_cita_view(request, cita_id):
+    if request.method == 'POST':
+        try:
+            cita = Cita.objects.get(id=cita_id)
+            if cita.estado == 'Programada' or cita.estado == 'Reprogramada':
+                cita.estado = 'Atendida'
+                cita.save()
+                
+                LogAuditoria.objects.create(
+                    usuario=request.user,
+                    accion='ATENDER_CITA',
+                    tabla_afectada='Cita',
+                    id_registro_afectado=cita.id,
+                    detalles='Cita marcada como Atendida.'
+                )
+                messages.success(request, 'Cita marcada como Atendida.')
+            else:
+                messages.error(request, 'Solo se pueden atender citas Programadas o Reprogramadas.')
         except Cita.DoesNotExist:
             messages.error(request, 'Cita no encontrada.')
             
@@ -231,6 +359,10 @@ def reagendar_cita_view(request, cita_id):
             if not is_aware(fecha_fin):
                 fecha_fin = make_aware(fecha_fin, get_current_timezone())
                 
+            if fecha_inicio < now():
+                messages.error(request, "No se pueden reagendar citas a fechas u horas pasadas.")
+                return redirect('agenda')
+                
             disponible, msg = is_time_slot_available(fecha_inicio, fecha_fin, exclude_cita_id=cita.id)
             if not disponible:
                 messages.error(request, f"No se pudo reagendar: {msg}")
@@ -249,6 +381,15 @@ def reagendar_cita_view(request, cita_id):
                 id_registro_afectado=cita.id,
                 detalles=f'Fecha original: {old_start.strftime("%Y-%m-%d %H:%M")}'
             )
+            
+            # ENVIAR EMAIL DE REAGENDAMIENTO (ASÍNCRONO)
+            if cita.paciente.correo_electronico:
+                asunto = "Cita Reagendada - AncaneSoft"
+                titulo = "¡Cita Modificada!"
+                mensaje_principal = "Tu cita ha sido reprogramada a un nuevo horario."
+                fecha_str = fecha_inicio.strftime('%Y-%m-%d a las %H:%M')
+                enviar_correo_html_async(asunto, titulo, cita.paciente.nombre_completo, mensaje_principal, cita.tipo_cita, fecha_str, cita.paciente.correo_electronico)
+                
             messages.success(request, 'Cita reagendada correctamente.')
         except Cita.DoesNotExist:
             messages.error(request, 'La cita no existe.')
@@ -311,4 +452,5 @@ def api_buscar_paciente(request):
             'entidad_id': paciente.entidad_id
         })
     except Paciente.DoesNotExist:
-        return JsonResponse({'encontrado': False})
+        return JsonResponse({'encontrado': False})
+

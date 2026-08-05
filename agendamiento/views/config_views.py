@@ -13,6 +13,10 @@ import openpyxl
 def configuracion_view(request):
     config = ConfiguracionSistema.load()
     if request.method == 'POST':
+        if not request.user.is_superuser:
+            messages.error(request, 'Solo el Superadmin puede modificar los colores y nombre del sistema.')
+            return redirect('configuracion')
+            
         nombre_clinica = request.POST.get('nombre_clinica')
         color_primario = request.POST.get('color_primario')
         color_secundario = request.POST.get('color_secundario')

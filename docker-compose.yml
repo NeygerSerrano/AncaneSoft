@@ -1,0 +1,35 @@
+services:
+  web:
+    build: .
+    container_name: ancane_soft
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      # Sobrescribe las variables de DB en .env para que apunten al contenedor 'db'
+      - DB_HOST=db
+      - DB_NAME=mediqqta
+      - DB_USER=mediqqta
+      - DB_PASSWORD=mediqqta
+      - DB_PORT=5432
+
+  db:
+    image: postgres:15-alpine
+    container_name: mediqqta
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=mediqqta
+      - POSTGRES_USER=mediqqta
+      - POSTGRES_PASSWORD=mediqqta
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:

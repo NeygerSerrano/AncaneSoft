@@ -7,11 +7,22 @@ from ..decorators import rol_requerido
 @login_required
 @rol_requerido(['Secretaria', 'Doctora'])
 def pacientes_view(request):
+    from django.db.models import Q
     pacientes = Paciente.objects.all().select_related('entidad')
     entidades = Entidad.objects.all()
+    
+    q = request.GET.get('q')
+    if q:
+        pacientes = pacientes.filter(
+            Q(nombre_completo__icontains=q) |
+            Q(nro_documento__icontains=q) |
+            Q(correo_electronico__icontains=q)
+        )
+        
     return render(request, 'agendamiento/pacientes.html', {
         'pacientes': pacientes,
-        'entidades': entidades
+        'entidades': entidades,
+        'q': q
     })
 
 @login_required

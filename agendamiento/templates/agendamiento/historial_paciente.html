@@ -5,12 +5,12 @@
 {% endblock %}
 
 {% block header_title %}
-    <a href="{% url 'pacientes' %}" class="flex items-center text-brand-primary hover:text-brand-primary/80 transition-colors font-bold mb-2">
-        <span class="material-symbols-outlined mr-1">arrow_back</span>
+    <a href="{% url 'pacientes' %}" class="flex items-center text-brand-primary hover:text-brand-primary/80 transition-colors font-bold mb-2 text-sm md:text-base">
+        <span class="material-symbols-outlined mr-1" style="font-size: 1.25rem;">arrow_back</span>
         Volver a Pacientes
     </a>
-    <h2 class="text-headline-md font-bold text-brand-secondary">Historial Clínico: {{ paciente.nombre_completo }}</h2>
-    <p class="text-label-md text-brand-secondary/80 mt-1">{{ paciente.tipo_documento }} {{ paciente.nro_documento }} | Tel: {{ paciente.telefono|default:"N/A" }} | Entidad: {{ paciente.entidad.nombre_entidad }}</p>
+    <h2 class="text-title-lg md:text-headline-md font-bold text-brand-secondary" style="line-height: 1.2;">Historial Clínico: {{ paciente.nombre_completo }}</h2>
+    <p class="text-sm md:text-label-md text-brand-secondary/80 mt-1">{{ paciente.tipo_documento }} {{ paciente.nro_documento }} | Tel: {{ paciente.telefono|default:"N/A" }} | Entidad: {{ paciente.entidad.nombre_entidad }}</p>
 {% endblock %}
 
 {% block header_actions %}
@@ -32,7 +32,7 @@
                     </div>
                     
                     <div class="bg-surface p-4 rounded-lg shadow-sm border border-outline-variant/30">
-                        <div class="flex justify-between items-start mb-2">
+                        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem;">
                             <div>
                                 <h4 class="text-label-md font-bold text-brand-secondary">{{ cita.fecha_hora_inicio|date:"d M Y, H:i" }}</h4>
                                 <p class="text-label-sm text-brand-primary mt-1 font-bold">{{ cita.tipo_cita }}</p>
@@ -41,7 +41,7 @@
                                 {% if cita.estado == 'Cancelada' %}bg-error-container text-on-error-container
                                 {% elif cita.estado == 'Reprogramada' %}bg-brand-secondary/10 text-brand-secondary
                                 {% elif cita.estado == 'Atendida' %}bg-brand-primary/10 text-brand-primary
-                                {% else %}bg-surface-variant text-on-surface-variant{% endif %}">
+                                {% else %}bg-surface-variant text-on-surface-variant{% endif %}" style="display: inline-block; white-space: nowrap; width: fit-content;">
                                 {{ cita.estado }}
                             </span>
                         </div>

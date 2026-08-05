@@ -1,7 +1,11 @@
-<aside class="fixed left-0 top-0 h-screen w-64 bg-brand-secondary flex flex-col py-6 shadow-sm z-50">
-    <div class="px-6 mb-10">
-        <h1 class="text-headline-md font-bold text-white">{{ configuracion.nombre_clinica|default:'MediQQTA' }}</h1>
-        <!-- <p class="text-label-sm text-white/70">Management Suite</p> -->
+{% load static %}
+<!-- Overlay (Fondo oscuro) -->
+<div id="sidebar-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 40; opacity: 0; transition: opacity 0.3s ease;"></div>
+
+<aside id="app-sidebar" class="bg-brand-secondary flex flex-col py-6 shadow-sm z-50 app-sidebar-custom">
+    <div class="px-6 mb-8 text-center flex flex-col items-center">
+        <img src="{% static 'agendamiento/img/AncaneSoftv2.png' %}" alt="Logo" class="w-32 h-auto mb-4 object-contain" />
+        <!-- <h1 class="text-headline-md font-bold text-white">{{ configuracion.nombre_clinica|default:'MediQQTA' }}</h1> -->
     </div>
     <nav class="flex-1 space-y-1">
         <a class="flex items-center gap-3 px-6 py-3 transition-all {% if active_tab == 'dashboard' %}border-l-4 border-white bg-white/10 text-on-primary font-bold{% else %}text-on-primary/70 hover:text-on-primary hover:bg-white/5{% endif %}" href="{% url 'dashboard' %}">

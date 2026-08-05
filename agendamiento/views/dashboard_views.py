@@ -6,6 +6,15 @@ from ..models import Cita
 
 @login_required
 def dashboard_view(request):
+    from django.utils.timezone import now
+    
+    # Auto-completar citas pasadas
+    hoy_lazy = now().date()
+    Cita.objects.filter(
+        fecha_hora_inicio__date__lt=hoy_lazy, 
+        estado__in=['Programada', 'Reprogramada']
+    ).update(estado='Atendida')
+
     # Si es recepcionista, redirigir a la agenda
     if request.user.rol and request.user.rol.nombre_rol == 'Recepcionista':
         return redirect('agenda')
@@ -36,7 +45,7 @@ def dashboard_view(request):
     proximas_citas = Cita.objects.filter(
         fecha_hora_inicio__gte=inicio_dia,
         fecha_hora_inicio__lte=fin_semana,
-        estado='Programada'
+        estado__in=['Programada', 'Reprogramada']
     ).select_related('paciente').order_by('fecha_hora_inicio')
 
     context = {

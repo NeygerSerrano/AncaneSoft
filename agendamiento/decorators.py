@@ -15,7 +15,7 @@ def rol_requerido(roles_permitidos):
             if not request.user.is_authenticated:
                 return redirect('login')
                 
-            if request.user.rol and request.user.rol.nombre_rol in roles_permitidos:
+            if (request.user.rol and request.user.rol.nombre_rol in roles_permitidos) or request.user.is_superuser:
                 return view_func(request, *args, **kwargs)
                 
             # Si no tiene permiso

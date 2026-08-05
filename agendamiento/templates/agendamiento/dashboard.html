@@ -22,10 +22,10 @@
 {% endblock %}
 
 {% block header_actions %}
-    <button class="bg-brand-primary text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-brand-primary/90 transition-all font-bold shadow-md">
+    <!-- <button class="bg-brand-primary text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-brand-primary/90 transition-all font-bold shadow-md">
         <span class="material-symbols-outlined text-base">download</span>
         Exportar Reporte
-    </button>
+    </button> -->
 {% endblock %}
 
 {% block page_content %}
@@ -70,8 +70,8 @@
                 <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                     <h2 class="text-headline-sm font-bold text-brand-secondary">Próximas Citas (Semana)</h2>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%;">
+                    <table class="w-full text-left border-collapse" style="min-width: 600px;">
                         <thead>
                             <tr class="bg-gray-50 text-brand-secondary/80 text-label-md border-b border-gray-100">
                                 <th class="p-4 font-bold">Fecha</th>

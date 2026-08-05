@@ -13,6 +13,12 @@
     ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
     
     /* FullCalendar customizations */
+    @media (max-width: 768px) {
+        .fc .fc-toolbar-title { font-size: 1.1rem !important; }
+    }
+    .fc-bg-event {
+        opacity: 0.6 !important;
+    }
     .fc {
         background-color: white;
         border-radius: 0.75rem;
@@ -47,30 +53,34 @@
 
 {% block page_content %}
 
-        {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-            <div class="p-4 mb-2 rounded-lg {% if message.tags == 'error' %}bg-error-container text-on-error-container{% else %}bg-green-100 text-green-800{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
         <!-- CALENDAR WRAPPER -->
         <div id="calendar" class="w-full h-[700px]"></div>
 
+{% if request.user.rol.nombre_rol == 'Secretaria' %}
+<!-- BOTÓN FLOTANTE MÓVIL PARA AGENDAR CITA -->
+<button onclick="abrirModalManual()" class="md:hidden bg-brand-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-brand-primary/90 transition-transform active:scale-95" style="position: fixed; bottom: 1.5rem; right: 1.5rem; width: 3.5rem; height: 3.5rem; z-index: 50;">
+    <span class="material-symbols-outlined text-2xl">add</span>
+</button>
+{% endif %}
+
+{% if request.user.rol.nombre_rol == 'Doctora' %}
+<!-- BOTÓN FLOTANTE MÓVIL PARA BLOQUEAR AGENDA -->
+<button onclick="abrirModalBloquear()" class="md:hidden bg-brand-secondary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-brand-secondary/90 transition-transform active:scale-95" style="position: fixed; bottom: 1.5rem; right: 1.5rem; width: 3.5rem; height: 3.5rem; z-index: 50;">
+    <span class="material-symbols-outlined text-2xl">block</span>
+</button>
+{% endif %}
+
 <!-- MODAL PARA AGENDAR CITA (Solo Secretaria) -->
 {% if request.user.rol.nombre_rol == 'Secretaria' %}
-<div id="agendamientoModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-        <div class="bg-brand-primary text-white px-6 py-4 flex justify-between items-center">
+<div id="agendamientoModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 sm:p-6">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden" style="max-height: 90vh;">
+        <div class="bg-brand-primary text-white px-6 py-4 flex justify-between items-center shrink-0">
             <h2 class="text-headline-sm font-bold">Agendar Nueva Cita</h2>
             <button onclick="cerrarModal()" class="text-white/80 hover:text-white transition-colors">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-        <form method="POST" action="{% url 'agenda' %}" class="p-6 space-y-4">
+        <form id="formAgendamiento" method="POST" action="{% url 'agenda' %}" class="p-6 space-y-4 overflow-y-auto flex-1">
             {% csrf_token %}
             
             <div class="grid grid-cols-2 gap-4">
@@ -151,9 +161,9 @@
 {% endif %}
 
 <!-- MODAL DETALLE CITA (Todos los roles) -->
-<div id="detalleModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
-        <div class="bg-brand-primary p-4 text-white flex justify-between items-center">
+<div id="detalleModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 sm:p-6">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden transform transition-all" style="max-height: 90vh;">
+        <div class="bg-brand-primary p-4 text-white flex justify-between items-center shrink-0">
             <h2 class="text-headline-sm font-bold flex items-center gap-2">
                 <span class="material-symbols-outlined">info</span> Detalles de la Cita
             </h2>
@@ -161,7 +171,7 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-        <div class="p-6">
+        <div class="p-6 overflow-y-auto flex-1">
             <div class="mb-4">
                 <p class="text-label-sm text-on-surface-variant font-bold">Paciente</p>
                 <p id="det_paciente" class="text-body-lg text-brand-secondary font-medium"></p>
@@ -194,14 +204,17 @@
             </div>
             {% endif %}
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-outline-variant">
-                <button type="button" onclick="cerrarModalDetalle()" class="px-4 py-2 bg-surface-variant text-on-surface-variant rounded-lg font-bold">Cerrar</button>
-                
+            <div class="pt-4 border-t border-outline-variant mt-4">
                 {% if request.user.rol.nombre_rol == 'Secretaria' %}
-                <button type="button" id="btn_cancelar_cita" class="px-4 py-2 bg-error text-white rounded-lg hover:bg-error-container font-bold transition-colors">Cancelar Cita</button>
-                <button type="button" id="btn_enviar_recordatorio" class="px-4 py-2 bg-brand-secondary text-white rounded-lg hover:bg-brand-primary font-bold transition-colors flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm">mail</span> Enviar Recordatorio
-                </button>
+                <div class="flex flex-col sm:flex-row gap-3 justify-end w-full">
+                    <button type="button" id="btn_cancelar_cita" style="display: none;" class="px-4 py-2.5 bg-error text-white rounded-lg hover:bg-error-container font-bold transition-colors text-center text-sm w-full sm:w-auto">Cancelar</button>
+                    <button type="button" id="btn_atender_cita" style="display: none; background-color: #059669; color: white;" class="px-4 py-2.5 rounded-lg hover:opacity-90 font-bold transition-opacity items-center justify-center gap-1 text-sm w-full sm:w-auto">
+                        <span class="material-symbols-outlined text-sm">check_circle</span> Atender
+                    </button>
+                    <button type="button" id="btn_enviar_recordatorio" style="display: none;" class="px-4 py-2.5 bg-brand-secondary text-white rounded-lg hover:bg-brand-primary font-bold transition-colors items-center justify-center gap-1 text-sm w-full sm:w-auto">
+                        <span class="material-symbols-outlined text-sm">mail</span> Recordatorio
+                    </button>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -210,15 +223,15 @@
 
 <!-- MODAL CANCELAR CITA (Solo Secretaria) -->
 {% if request.user.rol.nombre_rol == 'Secretaria' %}
-<div id="cancelarModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-        <div class="bg-error text-on-error px-6 py-4 flex justify-between items-center">
+<div id="cancelarModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 sm:p-6">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md flex flex-col overflow-hidden" style="max-height: 90vh;">
+        <div class="bg-error text-on-error px-6 py-4 flex justify-between items-center shrink-0">
             <h2 class="text-headline-sm font-bold">Cancelar Cita</h2>
             <button onclick="cerrarModalCancelar()" class="text-on-error/80 hover:text-white transition-colors">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-        <form id="formCancelarCita" method="POST" action="" class="p-6 space-y-4">
+        <form id="formCancelarCita" method="POST" action="" class="p-6 space-y-4 overflow-y-auto flex-1">
             {% csrf_token %}
             <p class="text-body-md text-on-surface">¿Estás segura de cancelar la cita de <strong id="cancelarNombrePaciente"></strong>?</p>
             <div>
@@ -236,15 +249,15 @@
 
 <!-- MODAL BLOQUEAR AGENDA (Solo Doctora) -->
 {% if request.user.rol.nombre_rol == 'Doctora' %}
-<div id="bloquearModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-        <div class="bg-surface-variant text-on-surface-variant px-6 py-4 flex justify-between items-center">
+<div id="bloquearModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 sm:p-6">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md flex flex-col overflow-hidden" style="max-height: 90vh;">
+        <div class="bg-surface-variant text-on-surface-variant px-6 py-4 flex justify-between items-center shrink-0">
             <h2 class="text-headline-sm font-bold">Bloquear Horario</h2>
             <button onclick="cerrarModalBloquear()" class="text-on-surface-variant/80 hover:text-on-surface transition-colors">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-        <form method="POST" action="{% url 'bloquear_agenda' %}" class="p-6 space-y-4">
+        <form method="POST" action="{% url 'bloquear_agenda' %}" class="p-6 space-y-4 overflow-y-auto flex-1">
             {% csrf_token %}
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
@@ -276,15 +289,36 @@
         var calendarEl = document.getElementById('calendar');
         
         var isRecepcionista = (userRole === 'Recepcionista');
-        var initialView = isRecepcionista ? 'timeGridDay' : 'timeGridWeek';
+        var isMobile = window.innerWidth < 768;
+        var defaultDesktopView = isRecepcionista ? 'timeGridDay' : 'timeGridWeek';
+        var initialView = isMobile ? 'timeGridDay' : defaultDesktopView;
+        
+        var headerToolbarDesktop = {
+            left: 'prev,next today',
+            center: 'title',
+            right: isRecepcionista ? 'timeGridDay' : 'dayGridMonth,timeGridWeek,timeGridDay'
+        };
+        
+        var headerToolbarMobile = {
+            left: 'prev,next',
+            center: 'title',
+            right: 'today'
+        };
         
         var calendar = new FullCalendar.Calendar(calendarEl, {
             locale: 'es',
             initialView: initialView,
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: isRecepcionista ? 'timeGridDay' : 'dayGridMonth,timeGridWeek,timeGridDay'
+            headerToolbar: isMobile ? headerToolbarMobile : headerToolbarDesktop,
+            windowResize: function(view) {
+                var mobileNow = window.innerWidth < 768;
+                if (mobileNow) {
+                    calendar.setOption('headerToolbar', headerToolbarMobile);
+                    if (calendar.view.type !== 'timeGridDay') {
+                        calendar.changeView('timeGridDay');
+                    }
+                } else {
+                    calendar.setOption('headerToolbar', headerToolbarDesktop);
+                }
             },
             slotMinTime: '06:00:00',
             slotMaxTime: '21:00:00',
@@ -294,6 +328,13 @@
             selectMirror: !isRecepcionista,
             select: function(info) {
                 if(isRecepcionista) return;
+                
+                var now = new Date();
+                if (info.start < now) {
+                    alert("No se pueden agendar citas en fechas u horas pasadas.");
+                    calendar.unselect();
+                    return;
+                }
                 
                 var tzoffset = (new Date()).getTimezoneOffset() * 60000;
                 var startStr = (new Date(info.start - tzoffset)).toISOString().slice(0, 16);
@@ -328,7 +369,7 @@
                             var dbId = eventId.split('_')[1];
                             var form = document.createElement('form');
                             form.method = 'POST';
-                            form.action = '/citas/bloqueos/' + dbId + '/desbloquear/';
+                            form.action = '/desbloquear/' + dbId + '/';
                             
                             var csrf = document.createElement('input');
                             csrf.type = 'hidden';
@@ -358,38 +399,64 @@
                 
                 var btnCancelar = document.getElementById('btn_cancelar_cita');
                 var btnRecordatorio = document.getElementById('btn_enviar_recordatorio');
+                var btnAtender = document.getElementById('btn_atender_cita');
                 
                 if (userRole === 'Secretaria') {
-                    if (estado === 'Cancelada' || estado === 'Atendida') {
-                        btnCancelar.style.display = 'none';
-                        btnRecordatorio.style.display = 'none';
-                    } else {
-                        btnCancelar.style.display = 'block';
-                        btnRecordatorio.style.display = 'flex';
+                    // Resetear display
+                    if (btnCancelar) btnCancelar.style.display = 'none';
+                    if (btnRecordatorio) btnRecordatorio.style.display = 'none';
+                    if (btnAtender) btnAtender.style.display = 'none';
+                    
+                    if (estado !== 'Cancelada' && estado !== 'Atendida') {
+                        if (btnCancelar) {
+                            btnCancelar.style.display = 'block';
+                            btnCancelar.onclick = function() {
+                                cerrarModalDetalle();
+                                var dbId = eventId.split('_')[1];
+                                var form = document.getElementById('formCancelarCita');
+                                form.action = '/citas/' + dbId + '/cancelar/';
+                                document.getElementById('cancelarNombrePaciente').innerText = title;
+                                abrirModalCancelar();
+                            };
+                        }
                         
-                        btnCancelar.onclick = function() {
-                            cerrarModalDetalle();
-                            var dbId = eventId.split('_')[1];
-                            var form = document.getElementById('formCancelarCita');
-                            form.action = '/citas/' + dbId + '/cancelar/';
-                            document.getElementById('cancelarNombrePaciente').innerText = title;
-                            abrirModalCancelar();
-                        };
+                        if (btnRecordatorio) {
+                            btnRecordatorio.style.display = 'inline-flex';
+                            btnRecordatorio.onclick = function() {
+                                cerrarModalDetalle();
+                                var dbId = eventId.split('_')[1];
+                                var form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = '/citas/' + dbId + '/recordatorio/';
+                                var csrf = document.createElement('input');
+                                csrf.type = 'hidden';
+                                csrf.name = 'csrfmiddlewaretoken';
+                                csrf.value = '{{ csrf_token }}';
+                                form.appendChild(csrf);
+                                document.body.appendChild(form);
+                                form.submit();
+                            };
+                        }
                         
-                        btnRecordatorio.onclick = function() {
-                            cerrarModalDetalle();
-                            var dbId = eventId.split('_')[1];
-                            var form = document.createElement('form');
-                            form.method = 'POST';
-                            form.action = '/citas/' + dbId + '/recordatorio/';
-                            var csrf = document.createElement('input');
-                            csrf.type = 'hidden';
-                            csrf.name = 'csrfmiddlewaretoken';
-                            csrf.value = '{{ csrf_token }}';
-                            form.appendChild(csrf);
-                            document.body.appendChild(form);
-                            form.submit();
-                        };
+                        if (btnAtender) {
+                            btnAtender.style.display = 'inline-flex';
+                            btnAtender.onclick = function() {
+                                if (confirm("¿Marcar la cita como Atendida?")) {
+                                    cerrarModalDetalle();
+                                    var dbId = eventId.split('_')[1];
+                                    var form = document.createElement('form');
+                                    form.method = 'POST';
+                                    form.action = '/citas/' + dbId + '/atender/';
+                                    var csrf = document.createElement('input');
+                                    csrf.type = 'hidden';
+                                    csrf.name = 'csrfmiddlewaretoken';
+                                    csrf.value = '{{ csrf_token }}';
+                                    form.appendChild(csrf);
+                                    document.body.appendChild(form);
+                                    form.submit();
+                                }
+                            };
+                        }
                     }
                 }
                 
@@ -410,6 +477,16 @@
                 }
                 
                 if (confirm("¿Estás segura de reagendar la cita de " + info.event.title + "?")) {
+                    var tzoffset = (new Date()).getTimezoneOffset() * 60000;
+                    var startStr = (new Date(info.event.start - tzoffset)).toISOString().slice(0, 16);
+                    
+                    var now = new Date();
+                    if (info.event.start < now) {
+                        alert("No se pueden reagendar citas a fechas u horas pasadas.");
+                        info.revert();
+                        return;
+                    }
+
                     var dbId = info.event.id.split('_')[1];
                     var tzoffset = (new Date()).getTimezoneOffset() * 60000;
                     var startStr = (new Date(info.event.start - tzoffset)).toISOString().slice(0, 16);
@@ -487,7 +564,20 @@
     });
 
     function abrirModal() { document.getElementById('agendamientoModal').classList.remove('hidden'); }
-    function cerrarModal() { document.getElementById('agendamientoModal').classList.add('hidden'); }
+    function cerrarModal() { 
+        document.getElementById('agendamientoModal').classList.add('hidden'); 
+        document.getElementById('formAgendamiento').reset();
+    }
+    
+    function abrirModalManual() {
+        var tzoffset = (new Date()).getTimezoneOffset() * 60000;
+        var now = new Date(Date.now() - tzoffset);
+        var inOneHour = new Date(Date.now() - tzoffset + 3600000); // +1 hour
+        
+        document.getElementById('fecha_hora_inicio').value = now.toISOString().slice(0, 16);
+        document.getElementById('fecha_hora_fin').value = inOneHour.toISOString().slice(0, 16);
+        document.getElementById('agendamientoModal').classList.remove('hidden');
+    }
     
     function abrirModalCancelar() { document.getElementById('cancelarModal').classList.remove('hidden'); }
     function cerrarModalCancelar() { document.getElementById('cancelarModal').classList.add('hidden'); }
