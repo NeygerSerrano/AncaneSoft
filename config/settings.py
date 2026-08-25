@@ -135,6 +135,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 AUTH_USER_MODEL = 'agendamiento.Usuario'  # Indica que estamos usando nuestro modelo de usuario personalizado
 
 # Ruta por defecto de npm en Windows. (Asegúrate de poner la 'r' antes de las comillas)

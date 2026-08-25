@@ -17,3 +17,8 @@ db.sqlite3
 # Archivos del sistema operativo (Mac/Windows)
 .DS_Store
 Thumbs.db
+
+# Archivos informativos locales (No subir al repositorio)
+*.csv
+*.md
+!README.md

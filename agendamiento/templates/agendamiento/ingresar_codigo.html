@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block dynamic_colors %}
+<style>
+    :root {
+        --color-primary: #1d8797;
+        --color-secondary: #0f3856;
+    }
+</style>
+{% endblock dynamic_colors %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop bg-gray-50">
+<main class="w-full max-w-[1024px] bg-white rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row">
+    <!-- Left Side: Branding / Visual -->
+    <div class="hidden md:flex flex-col justify-between w-1/2 text-white p-12 relative overflow-hidden group bg-brand-secondary">
+        <div class="relative z-10 flex flex-col items-center text-center">
+            <img alt="Logo" class="h-48 w-auto mb-8 rounded-md" src="{% static 'agendamiento/img/logoqqta.png' %}">
+            <h1 class="font-headline-lg text-headline-lg text-white mb-4">AncaneSoft.</h1>
+            <p class="font-body-lg text-body-lg text-white">Sistema de agendamiento de citas.</p>
+        </div>
+        <div class="relative z-10 flex items-center gap-2 mt-auto">
+        </div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
+        <div class="absolute -top-12 -left-12 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+    </div>
+    
+    <!-- Right Side: Form -->
+    <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-white">
+        <!-- Mobile Header Logo (visible only on small screens) -->
+        <div class="md:hidden flex items-center justify-center mb-8">
+            <img alt="Logo" class="h-32 w-auto rounded-md" src="{% static 'agendamiento/img/logoqqta.png' %}">
+        </div>
+        <div class="mb-8">
+            <a href="{% url 'login' %}" class="inline-flex items-center text-brand-primary font-label-md mb-6 hover:opacity-80 transition-opacity">
+                <span class="material-symbols-outlined text-[18px] mr-1">arrow_back</span> Cancelar proceso
+            </a>
+            <h2 class="font-headline-md text-headline-md text-brand-secondary mb-2">Validar Código</h2>
+            <p class="font-body-md text-body-md text-gray-500">Hemos enviado un código de 6 dígitos al correo {{ email|default:"" }}. Ingresa el código a continuación (expira en 15 minutos).</p>
+        </div>
+
+        {% if messages %}
+            <div class="mb-4 p-4 rounded-md bg-error-container text-on-error-container">
+                {% for message in messages %}
+                    <p class="font-body-md text-body-md">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form class="space-y-6" method="post" action="{% url 'ingresar_codigo' %}">
+            {% csrf_token %}
+            <!-- Code Field -->
+            <div>
+                <label class="block font-label-md text-label-md text-brand-secondary mb-2" for="codigo">Código de 6 dígitos</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-brand-primary" style="font-variation-settings: 'FILL' 0;">password</span>
+                    <input class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-md font-body-md text-gray-800 text-center tracking-widest text-xl focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors" id="codigo" name="codigo" placeholder="123456" maxlength="6" type="text" required>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <button class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm font-label-md text-label-md text-white bg-brand-primary hover:bg-brand-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-colors" type="submit">
+                Validar Código
+                <span class="material-symbols-outlined ml-2 text-[18px]" style="font-variation-settings: 'FILL' 0;">check_circle</span>
+            </button>
+        </form>
+    </div>
+</main>
+</div>
+{% endblock content %}

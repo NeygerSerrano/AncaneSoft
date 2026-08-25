@@ -13,20 +13,21 @@ import openpyxl
 def configuracion_view(request):
     config = ConfiguracionSistema.load()
     if request.method == 'POST':
-        if not request.user.is_superuser:
-            messages.error(request, 'Solo el Superadmin puede modificar los colores y nombre del sistema.')
-            return redirect('configuracion')
+        if request.user.is_superuser:
+            nombre_clinica = request.POST.get('nombre_clinica')
+            color_primario = request.POST.get('color_primario')
+            color_secundario = request.POST.get('color_secundario')
             
-        nombre_clinica = request.POST.get('nombre_clinica')
-        color_primario = request.POST.get('color_primario')
-        color_secundario = request.POST.get('color_secundario')
-        
-        if nombre_clinica:
-            config.nombre_clinica = nombre_clinica
-        if color_primario:
-            config.color_primario = color_primario
-        if color_secundario:
-            config.color_secundario = color_secundario
+            if nombre_clinica:
+                config.nombre_clinica = nombre_clinica
+            if color_primario:
+                config.color_primario = color_primario
+            if color_secundario:
+                config.color_secundario = color_secundario
+            
+        logo = request.FILES.get('logo')
+        if logo:
+            config.logo = logo
             
         config.save()
         messages.success(request, 'Configuración actualizada correctamente.')

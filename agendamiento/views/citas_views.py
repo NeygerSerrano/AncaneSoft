@@ -26,7 +26,9 @@ class EmailThread(threading.Thread):
             print(f"Error enviando correo asíncrono: {e}")
 
 def enviar_correo_html_async(asunto, titulo, paciente_nombre, mensaje_principal, tipo_cita, fecha_hora, destinatario):
+    from ..models import ConfiguracionSistema
     try:
+        config = ConfiguracionSistema.load()
         html_content = render_to_string('agendamiento/emails/correo_cita.html', {
             'asunto': asunto,
             'titulo': titulo,
@@ -34,6 +36,9 @@ def enviar_correo_html_async(asunto, titulo, paciente_nombre, mensaje_principal,
             'mensaje_principal': mensaje_principal,
             'tipo_cita': tipo_cita,
             'fecha_hora': fecha_hora,
+            'color_primario': config.color_primario,
+            'color_secundario': config.color_secundario,
+            'nombre_clinica': config.nombre_clinica,
         })
         text_content = f"Hola {paciente_nombre},\n\n{mensaje_principal}\n\nTipo de cita: {tipo_cita}\nFecha y hora: {fecha_hora}\n\n¡Te esperamos!"
         email = EmailMultiAlternatives(
@@ -44,13 +49,20 @@ def enviar_correo_html_async(asunto, titulo, paciente_nombre, mensaje_principal,
         )
         email.attach_alternative(html_content, "text/html")
         
-        logo_path = os.path.join(settings.BASE_DIR, 'agendamiento', 'static', 'agendamiento', 'img', 'AncaneSoftv2.png')
+        # Check for dynamic logo first
+        if config.logo and os.path.exists(config.logo.path):
+            logo_path = config.logo.path
+            filename = os.path.basename(logo_path)
+        else:
+            logo_path = os.path.join(settings.BASE_DIR, 'agendamiento', 'static', 'agendamiento', 'img', 'AncaneSoftv2.png')
+            filename = 'AncaneSoftv2.png'
+            
         if os.path.exists(logo_path):
             with open(logo_path, 'rb') as f:
                 logo_data = f.read()
             logo = MIMEImage(logo_data)
             logo.add_header('Content-ID', '<logo>')
-            logo.add_header('Content-Disposition', 'inline', filename='AncaneSoftv2.png')
+            logo.add_header('Content-Disposition', 'inline', filename=filename)
             email.attach(logo)
             
         EmailThread(email).start()
@@ -178,7 +190,7 @@ def api_citas(request):
     color_primario = config.color_primario if config.color_primario else '#1d8797'
     color_secundario = config.color_secundario if config.color_secundario else '#0f3856'
     
-    citas = Cita.objects.select_related('paciente')
+    citas = Cita.objects.select_related('paciente').exclude(estado='Cancelada')
     if start and end:
         citas = citas.filter(fecha_hora_inicio__gte=start, fecha_hora_fin__lte=end)
         
@@ -223,7 +235,7 @@ def api_citas(request):
             'start': bloqueo.fecha_hora_inicio.isoformat(),
             'end': bloqueo.fecha_hora_fin.isoformat(),
             'color': '#1f2937',
-            'display': 'background'
+            'textColor': '#ffffff'
         })
         
     return JsonResponse(eventos, safe=False)

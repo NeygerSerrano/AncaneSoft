@@ -19,6 +19,7 @@ class ConfiguracionSistema(models.Model):
     color_primario = models.CharField(max_length=20, default="#1d8797", help_text="Color principal (ej. Diente, botones)")
     color_secundario = models.CharField(max_length=20, default="#0f3856", help_text="Color secundario (ej. Reloj, sidebar, textos)")
     nombre_clinica = models.CharField(max_length=100, default="MediQQTA", help_text="Nombre de la Clínica o Consultorio")
+    logo = models.ImageField(upload_to='logos/', null=True, blank=True, help_text="Logo de la clínica para correos y reportes")
     
     def save(self, *args, **kwargs):
         # Asegurarnos de que solo exista un registro

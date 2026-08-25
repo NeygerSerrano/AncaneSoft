@@ -1,4 +1,4 @@
-from .auth_views import login_view, logout_view
+from .auth_views import login_view, logout_view, solicitar_recuperacion, ingresar_codigo, restablecer_contrasena
 from .dashboard_views import dashboard_view
 from .citas_views import (
     agenda_view, api_citas, citas_list_view, cancelar_cita_view,
