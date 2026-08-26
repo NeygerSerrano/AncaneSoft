@@ -58,7 +58,7 @@
                 <tbody class="divide-y divide-outline-variant/30 text-body-md text-on-surface">
                     {% for c in citas %}
                     <tr class="hover:bg-surface/50 transition-colors">
-                        <td class="px-6 py-4 font-bold">{{ c.fecha_hora_inicio|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4 font-bold">{{ c.fecha_hora_inicio|date:"d/m/Y h:i A" }}</td>
                         <td class="px-6 py-4">{{ c.paciente.nombre_completo }}</td>
                         <td class="px-6 py-4">{{ c.tipo_cita }}</td>
                         <td class="px-6 py-4 text-on-surface-variant text-sm">{{ c.usuario_agendo.first_name }}</td>

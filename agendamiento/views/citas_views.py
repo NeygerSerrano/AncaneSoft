@@ -160,7 +160,7 @@ def agenda_view(request):
             asunto = "Confirmación de Cita - AncaneSoft"
             titulo = "¡Cita Confirmada!"
             mensaje_principal = "Tu cita ha sido agendada con éxito."
-            fecha_str = fecha_inicio.strftime('%Y-%m-%d a las %H:%M')
+            fecha_str = fecha_inicio.strftime('%Y-%m-%d a las %I:%M %p')
             enviar_correo_html_async(asunto, titulo, paciente.nombre_completo, mensaje_principal, tipo_cita, fecha_str, paciente.correo_electronico)
         
         messages.success(request, 'Cita agendada correctamente.')
@@ -299,7 +299,7 @@ def cancelar_cita_view(request, cita_id):
                 asunto = "Cita Cancelada - AncaneSoft"
                 titulo = "Cita Cancelada"
                 mensaje_principal = f"Te informamos que tu cita ha sido cancelada.<br><br><strong>Motivo:</strong> {motivo}"
-                fecha_cancelacion_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d a las %H:%M')
+                fecha_cancelacion_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d a las %I:%M %p')
                 enviar_correo_html_async(asunto, titulo, cita.paciente.nombre_completo, mensaje_principal, cita.tipo_cita, fecha_cancelacion_str, cita.paciente.correo_electronico)
             
             messages.success(request, 'Cita cancelada con éxito.')
@@ -318,7 +318,9 @@ def enviar_recordatorio_view(request, cita_id):
                 asunto = "Recordatorio de Cita - AncaneSoft"
                 titulo = "¡Recordatorio de Cita!"
                 mensaje_principal = "Te recordamos que tienes una cita programada con nosotros."
-                fecha_str = cita.fecha_hora_inicio.strftime('%Y-%m-%d a las %H:%M')
+                from django.utils import timezone
+                local_dt = timezone.localtime(cita.fecha_hora_inicio)
+                fecha_str = local_dt.strftime('%Y-%m-%d a las %I:%M %p')
                 enviado = enviar_correo_html_async(asunto, titulo, cita.paciente.nombre_completo, mensaje_principal, cita.tipo_cita, fecha_str, cita.paciente.correo_electronico)
                 
                 if enviado:
@@ -399,7 +401,7 @@ def reagendar_cita_view(request, cita_id):
                 asunto = "Cita Reagendada - AncaneSoft"
                 titulo = "¡Cita Modificada!"
                 mensaje_principal = "Tu cita ha sido reprogramada a un nuevo horario."
-                fecha_str = fecha_inicio.strftime('%Y-%m-%d a las %H:%M')
+                fecha_str = fecha_inicio.strftime('%Y-%m-%d a las %I:%M %p')
                 enviar_correo_html_async(asunto, titulo, cita.paciente.nombre_completo, mensaje_principal, cita.tipo_cita, fecha_str, cita.paciente.correo_electronico)
                 
             messages.success(request, 'Cita reagendada correctamente.')

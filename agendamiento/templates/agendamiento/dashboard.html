@@ -84,7 +84,7 @@
                             {% for cita in proximas_citas %}
                             <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                                 <td class="p-4">{{ cita.fecha_hora_inicio|date:"d/m/Y" }}</td>
-                                <td class="p-4 font-bold text-brand-primary">{{ cita.fecha_hora_inicio|date:"H:i" }}</td>
+                                <td class="p-4 font-bold text-brand-primary">{{ cita.fecha_hora_inicio|date:"h:i A" }}</td>
                                 <td class="p-4">{{ cita.paciente.nombre_completo }}</td>
                                 <td class="p-4">
                                     <span class="px-3 py-1 rounded-full text-label-sm font-medium {% if cita.tipo_cita == 'Valoración' %}bg-brand-primary/10 text-brand-primary{% else %}bg-brand-secondary/10 text-brand-secondary{% endif %}">
