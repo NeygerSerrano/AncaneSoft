@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /citas/
+Disallow: /pacientes/
+Disallow: /configuracion/
+Allow: /login/
+Allow: /
+Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml
