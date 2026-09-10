@@ -1,4 +1,4 @@
-# AncaneSoft (MediQQTA)
+# AncaneSoft
 Sistema Integral de Agendamiento Médico y Administración de Clínicas
 
 ## 📋 Descripción del Proyecto
