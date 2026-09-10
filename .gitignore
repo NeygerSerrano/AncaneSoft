@@ -21,4 +21,4 @@ Thumbs.db
 # Archivos informativos locales (No subir al repositorio)
 *.csv
 *.md
-!README.md
+!README.md!DOCKER_INSTRUCTIONS.md
