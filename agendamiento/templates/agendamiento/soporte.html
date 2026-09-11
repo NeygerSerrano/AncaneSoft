@@ -1,51 +1,53 @@
-{% extends 'base.html' %}
+{% extends 'agendamiento/layouts/base_app.html' %}
 
-{% block content %}
-<div class="flex overflow-hidden w-full min-h-screen bg-surface">
-    <!-- SIDEBAR -->
+{% block header_title %}
+    <h2 class="text-headline-md font-bold text-brand-secondary">Soporte</h2>
+{% endblock %}
+
+{% block sidebar %}
     {% include 'agendamiento/includes/sidebar.html' with active_tab='soporte' %}
+{% endblock %}
 
-    <!-- MAIN CONTENT -->
-    <main class="ml-64 flex-1 h-screen overflow-y-auto bg-surface-bright p-8 relative">
-        <header class="mb-12 text-center max-w-2xl mx-auto mt-8">
-            <div class="inline-flex items-center justify-center p-4 bg-primary-fixed rounded-2xl mb-4">
-                <span class="material-symbols-outlined text-4xl text-primary-container">support_agent</span>
+{% block page_content %}
+<div class="max-w-6xl mx-auto">
+    <header class="mb-12 text-center max-w-2xl mx-auto mt-8">
+        <div class="inline-flex items-center justify-center p-4 bg-primary-fixed rounded-2xl mb-4">
+            <span class="material-symbols-outlined text-4xl text-primary-container">support_agent</span>
+        </div>
+        <h2 class="text-headline-lg font-bold text-on-surface">¿Cómo podemos ayudarte?</h2>
+        <p class="text-body-lg text-on-surface-variant mt-2">Encuentra respuestas a preguntas frecuentes o contacta con el equipo de soporte técnico de AncaneSoft.</p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <!-- Contact Card 1 -->
+        <div class="bg-white rounded-xl shadow-[0px_4px_12px_rgba(27,67,50,0.06)] p-8 border border-outline-variant/30 hover:shadow-md transition-shadow">
+            <span class="material-symbols-outlined text-3xl text-secondary-container mb-4">mail</span>
+            <h3 class="text-headline-sm font-bold text-on-surface mb-2">Soporte por Correo</h3>
+            <p class="text-body-md text-on-surface-variant mb-6">Escríbenos detallando tu problema y te responderemos en menos de 24 horas hábiles.</p>
+            <a href="mailto:neyserrano2001@gmail.com" class="text-label-md font-bold text-secondary-container hover:text-secondary underline">neyserrano2001@gmail.com</a>
+        </div>
+
+        <!-- Contact Card 2 -->
+        <div class="bg-white rounded-xl shadow-[0px_4px_12px_rgba(27,67,50,0.06)] p-8 border border-outline-variant/30 hover:shadow-md transition-shadow">
+            <span class="material-symbols-outlined text-3xl text-primary-container mb-4">call</span>
+            <h3 class="text-headline-sm font-bold text-on-surface mb-2">Línea de Atención</h3>
+            <p class="text-body-md text-on-surface-variant mb-6">Llámanos si tienes una urgencia técnica que impide el uso del sistema.</p>
+            <p class="text-label-md font-bold text-primary-container"><a href="tel:+573104010112" class="hover:underline">+57 310 401 0112</a></p>
+        </div>
+    </div>
+    
+    <div class="mt-16 max-w-4xl mx-auto">
+        <h3 class="text-headline-md font-bold text-on-surface mb-6">Preguntas Frecuentes</h3>
+        <div class="space-y-4">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
+                <h4 class="text-label-md font-bold text-on-surface mb-2">¿Cómo agendar una cita para un paciente nuevo?</h4>
+                <p class="text-body-md text-on-surface-variant">Ve a la sección "Agenda", haz clic en el horario deseado e ingresa un número de documento que no esté registrado. El sistema te pedirá el nombre y teléfono para crear al paciente y agendar su cita automáticamente.</p>
             </div>
-            <h2 class="text-headline-lg font-bold text-on-surface">¿Cómo podemos ayudarte?</h2>
-            <p class="text-body-lg text-on-surface-variant mt-2">Encuentra respuestas a preguntas frecuentes o contacta con el equipo de soporte técnico de DentalPro.</p>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <!-- Contact Card 1 -->
-            <div class="bg-white rounded-xl shadow-[0px_4px_12px_rgba(27,67,50,0.06)] p-8 border border-outline-variant/30 hover:shadow-md transition-shadow">
-                <span class="material-symbols-outlined text-3xl text-secondary-container mb-4">mail</span>
-                <h3 class="text-headline-sm font-bold text-on-surface mb-2">Soporte por Correo</h3>
-                <p class="text-body-md text-on-surface-variant mb-6">Escríbenos detallando tu problema y te responderemos en menos de 24 horas hábiles.</p>
-                <a href="mailto:soporte@dentalpro.com" class="text-label-md font-bold text-secondary-container hover:text-secondary underline">soporte@dentalpro.com</a>
-            </div>
-
-            <!-- Contact Card 2 -->
-            <div class="bg-white rounded-xl shadow-[0px_4px_12px_rgba(27,67,50,0.06)] p-8 border border-outline-variant/30 hover:shadow-md transition-shadow">
-                <span class="material-symbols-outlined text-3xl text-primary-container mb-4">call</span>
-                <h3 class="text-headline-sm font-bold text-on-surface mb-2">Línea de Atención</h3>
-                <p class="text-body-md text-on-surface-variant mb-6">Llámanos si tienes una urgencia técnica que impide el uso del sistema.</p>
-                <p class="text-label-md font-bold text-primary-container">+57 (300) 123-4567</p>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
+                <h4 class="text-label-md font-bold text-on-surface mb-2">¿Puedo eliminar una cita?</h4>
+                <p class="text-body-md text-on-surface-variant">Actualmente el sistema permite "Cancelar" citas pero no eliminarlas permanentemente para mantener un registro de auditoría. Puedes cambiar el estado de la cita editándola en la Agenda.</p>
             </div>
         </div>
-        
-        <div class="mt-16 max-w-4xl mx-auto">
-            <h3 class="text-headline-md font-bold text-on-surface mb-6">Preguntas Frecuentes</h3>
-            <div class="space-y-4">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
-                    <h4 class="text-label-md font-bold text-on-surface mb-2">¿Cómo agendar una cita para un paciente nuevo?</h4>
-                    <p class="text-body-md text-on-surface-variant">Ve a la sección "Agenda", haz clic en el horario deseado e ingresa un número de documento que no esté registrado. El sistema te pedirá el nombre y teléfono para crear al paciente y agendar su cita automáticamente.</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
-                    <h4 class="text-label-md font-bold text-on-surface mb-2">¿Puedo eliminar una cita?</h4>
-                    <p class="text-body-md text-on-surface-variant">Actualmente el sistema permite "Cancelar" citas pero no eliminarlas permanentemente para mantener un registro de auditoría. Puedes cambiar el estado de la cita editándola en la Agenda.</p>
-                </div>
-            </div>
-        </div>
-    </main>
+    </div>
 </div>
 {% endblock %}
