@@ -13,13 +13,13 @@
     <!-- Open Graph (SEO Social) -->
     <meta property="og:title" content="{% block og_title %}AncaneSoft | Sistema de Agendamiento{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Sistema de agendamiento y gestión de citas odontológicas AncaneSoft.{% endblock %}">
-    <meta property="og:image" content="{% block og_image %}{% static 'agendamiento/img/AncaneSoftv2.png' %}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'agendamiento/img/AncaneSoftv2.webp' %}{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'agendamiento/img/AncaneSoftv2.png' %}">
-    <link rel="apple-touch-icon" href="{% static 'agendamiento/img/AncaneSoftv2.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'agendamiento/img/AncaneSoftv2.webp' %}">
+    <link rel="apple-touch-icon" href="{% static 'agendamiento/img/AncaneSoftv2.webp' %}">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -53,5 +53,42 @@
 <body class="bg-surface font-body-md text-on-surface">
     {% block content %}
     {% endblock content %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    // Skip forms that use AJAX or are explicitly set to not submit normally
+                    if (form.getAttribute('onsubmit') === 'return false;' || form.id === 'search-form') {
+                        return;
+                    }
+                    
+                    // Trigger HTML5 validation first
+                    if (!form.checkValidity()) {
+                        return;
+                    }
+                    
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        // Prevent double click
+                        if (submitBtn.disabled) {
+                            e.preventDefault();
+                            return;
+                        }
+                        
+                        // Set width to prevent button shrinking
+                        const currentWidth = submitBtn.offsetWidth;
+                        submitBtn.style.width = currentWidth + 'px';
+                        
+                        // Disable and show loading state
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px] mr-2">progress_activity</span>Procesando...';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
