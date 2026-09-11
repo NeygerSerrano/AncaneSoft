@@ -26,7 +26,15 @@ urlpatterns = [
     path('', include('agendamiento.urls')),
     path('robots.txt', TemplateView.as_view(template_name="seo/robots.txt", content_type="text/plain")),
     path('sitemap.xml', TemplateView.as_view(template_name="seo/sitemap.xml", content_type="application/xml")),
+    path('privacidad/', TemplateView.as_view(template_name="privacidad.html"), name='privacidad'),
+    path('terminos/', TemplateView.as_view(template_name="terminos.html"), name='terminos'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    
+    # Rutas para probar las páginas de error en entorno local
+    urlpatterns += [
+        path('test-404/', TemplateView.as_view(template_name="404.html")),
+        path('test-500/', TemplateView.as_view(template_name="500.html")),
+    ]

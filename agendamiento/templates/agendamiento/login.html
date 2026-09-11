@@ -19,9 +19,13 @@
             <h1 class="font-headline-lg text-headline-lg text-white mb-4">AncaneSoft.</h1>
             <p class="font-body-lg text-body-lg text-white">Sistema de agendamiento de citas.</p>
         </div>
-        <div class="relative z-10 flex items-center gap-2 mt-auto">
-            <!-- <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">verified_user</span>
-            <span class="font-label-sm text-label-sm text-white">HIPAA Compliant &amp; Secure</span> -->
+        <div class="relative z-10 flex flex-col items-center gap-2 mt-auto text-white/80 text-sm">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'privacidad' %}" class="hover:text-white transition-colors hover:underline">Privacidad</a>
+                <span>&bull;</span>
+                <a href="{% url 'terminos' %}" class="hover:text-white transition-colors hover:underline">Términos</a>
+            </div>
+            <span class="text-xs opacity-70">&copy; {% now "Y" %} AncaneSoft</span>
         </div>
         <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
         <div class="absolute -top-12 -left-12 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
@@ -73,12 +77,12 @@
             </div>
             
             <!-- Remember Me -->
-            <!-- <div class="flex items-center">
-                <input class="h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded cursor-pointer" id="remember-me" name="remember-me" type="checkbox">
+            <div class="flex items-center">
+                <input class="h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded cursor-pointer" id="remember-me" name="remember_me" type="checkbox">
                 <label class="ml-2 block font-body-md text-body-md text-gray-500 cursor-pointer" for="remember-me">
-                    Recordarme por 30 días
+                    Mantener sesión iniciada
                 </label>
-            </div> -->
+            </div>
             
             <!-- Login Button -->
             <button class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm font-label-md text-label-md text-white bg-brand-primary hover:bg-brand-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-colors" type="submit">

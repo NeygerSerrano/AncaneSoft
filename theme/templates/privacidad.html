@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block dynamic_colors %}
+<style>
+    :root {
+        --color-primary: #1d8797;
+        --color-secondary: #0f3856;
+    }
+</style>
+{% endblock dynamic_colors %}
+
+{% block title %}Política de Privacidad | AncaneSoft{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex flex-col">
+    <!-- Top Header -->
+    <div class="w-full bg-brand-secondary text-white py-12 px-6 relative overflow-hidden">
+        <div class="absolute -top-12 -left-12 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl"></div>
+        
+        <div class="max-w-4xl mx-auto relative z-10 flex flex-col items-center">
+            <a href="{% url 'login' %}" class="absolute -top-6 -right-2 text-white/70 hover:text-white transition-colors flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                <span class="text-label-md font-bold">Volver</span>
+            </a>
+            
+            <img alt="Logotipo de AncaneSoft" class="h-16 w-auto mb-6 rounded-md shadow-sm" src="{% static 'agendamiento/img/AncaneSoftv2.webp' %}">
+            <h1 class="text-headline-lg font-bold text-center">Política de Privacidad</h1>
+            <p class="text-body-md text-white/80 mt-2">Última actualización: Septiembre de 2026</p>
+        </div>
+    </div>
+
+    <!-- Content Card -->
+    <div class="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 -mt-8 relative z-20 mb-12">
+        <div class="bg-white rounded-xl shadow-md p-8 md:p-12 border border-gray-100">
+            <div class="prose prose-brand max-w-none text-body-lg text-on-surface">
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4 mt-0">1. Introducción</h2>
+                <p class="mb-6">
+                    En AncaneSoft, nos tomamos muy en serio la privacidad y la seguridad de los datos. Esta Política de Privacidad describe cómo recopilamos, utilizamos, almacenamos y compartimos la información personal de los usuarios que interactúan con nuestro sistema de agendamiento de citas médicas y odontológicas.
+                </p>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">2. Información que Recopilamos</h2>
+                <p class="mb-4">
+                    Recopilamos la siguiente información para el funcionamiento del sistema:
+                </p>
+                <ul class="list-disc pl-6 mb-6 space-y-2">
+                    <li><strong>Información del Profesional o Empleado:</strong> Nombres, apellidos, correo electrónico, rol dentro del sistema y credenciales de acceso.</li>
+                    <li><strong>Información de Pacientes:</strong> Nombres, apellidos, número de documento de identidad (Cédula/NIT), teléfono de contacto e historial de agendamiento de citas.</li>
+                    <li><strong>Datos de Uso:</strong> Información sobre cómo y cuándo se accede al sistema (direcciones IP, tipo de navegador, registros de auditoría de creación y cancelación de citas).</li>
+                </ul>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">3. Uso de la Información</h2>
+                <p class="mb-4">
+                    Utilizamos la información recopilada exclusivamente para los siguientes propósitos:
+                </p>
+                <ul class="list-disc pl-6 mb-6 space-y-2">
+                    <li>Proporcionar, operar y mantener el sistema de agendamiento.</li>
+                    <li>Gestionar las citas médicas, enviar notificaciones o confirmaciones automáticas por correo electrónico o WhatsApp.</li>
+                    <li>Mejorar la plataforma y desarrollar nuevas funcionalidades.</li>
+                    <li>Garantizar la seguridad de las cuentas y prevenir actividades fraudulentas o no autorizadas.</li>
+                </ul>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">4. Protección de Datos y Privacidad del Paciente</h2>
+                <p class="mb-6">
+                    Al ser un sistema que maneja datos sensibles de pacientes, implementamos medidas de seguridad técnicas y organizativas para proteger la información contra acceso no autorizado, alteración, divulgación o destrucción. No compartimos, vendemos ni alquilamos los datos de sus pacientes a terceros. La clínica o el doctor administrador es el único propietario de la base de datos de sus pacientes.
+                </p>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">5. Sus Derechos</h2>
+                <p class="mb-6">
+                    Usted y sus pacientes tienen derecho a solicitar acceso, corrección, actualización o eliminación de sus datos personales. Si un paciente desea que su registro sea eliminado del sistema, el administrador de la clínica deberá gestionar dicha solicitud conforme a las leyes locales de protección de datos (ej. Ley 1581 de 2012 en Colombia).
+                </p>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">6. Uso de Cookies</h2>
+                <p class="mb-6">
+                    Utilizamos cookies esenciales para mantener las sesiones de los usuarios activos y por motivos de seguridad (como los tokens CSRF). No utilizamos cookies de rastreo de terceros con fines publicitarios dentro de la aplicación.
+                </p>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">7. Contacto</h2>
+                <p class="mb-4">
+                    Si tiene alguna pregunta o inquietud sobre esta Política de Privacidad o sobre cómo manejamos sus datos, puede contactarnos a través de:
+                </p>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="mb-1">
+                        <span class="material-symbols-outlined text-sm align-middle mr-2 text-brand-primary">mail</span>
+                        <strong>Correo electrónico:</strong> <a href="mailto:neyserrano2001@gmail.com" class="text-brand-primary hover:underline">neyserrano2001@gmail.com</a>
+                    </p>
+                    <p>
+                        <span class="material-symbols-outlined text-sm align-middle mr-2 text-brand-primary">call</span>
+                        <strong>Teléfono:</strong> <a href="tel:+573104010112" class="text-brand-primary hover:underline">+57 310 401 0112</a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center border-t border-gray-100 pt-8">
+                <a href="{% url 'login' %}" class="inline-flex justify-center py-3 px-8 border border-transparent rounded-lg shadow-sm text-label-lg font-bold text-white bg-brand-primary hover:bg-brand-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-transform active:scale-95">
+                    Ir a iniciar sesión
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

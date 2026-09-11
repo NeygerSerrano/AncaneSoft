@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block dynamic_colors %}
+<style>
+    :root {
+        --color-primary: #1d8797;
+        --color-secondary: #0f3856;
+    }
+</style>
+{% endblock dynamic_colors %}
+
+{% block title %}Términos y Condiciones | AncaneSoft{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex flex-col">
+    <!-- Top Header -->
+    <div class="w-full bg-brand-secondary text-white py-12 px-6 relative overflow-hidden">
+        <div class="absolute -top-12 -left-12 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl"></div>
+        
+        <div class="max-w-4xl mx-auto relative z-10 flex flex-col items-center">
+            <a href="{% url 'login' %}" class="absolute -top-6 -right-2 text-white/70 hover:text-white transition-colors flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                <span class="text-label-md font-bold">Volver</span>
+            </a>
+            
+            <img alt="Logotipo de AncaneSoft" class="h-16 w-auto mb-6 rounded-md shadow-sm" src="{% static 'agendamiento/img/AncaneSoftv2.webp' %}">
+            <h1 class="text-headline-lg font-bold text-center">Términos y Condiciones de Uso</h1>
+            <p class="text-body-md text-white/80 mt-2">Última actualización: Septiembre de 2026</p>
+        </div>
+    </div>
+
+    <!-- Content Card -->
+    <div class="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 -mt-8 relative z-20 mb-12">
+        <div class="bg-white rounded-xl shadow-md p-8 md:p-12 border border-gray-100">
+            <div class="prose prose-brand max-w-none text-body-lg text-on-surface">
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4 mt-0">1. Aceptación de los Términos</h2>
+                <p class="mb-6">
+                    Al acceder y utilizar el sistema web AncaneSoft (en adelante, "el Sistema"), usted acepta estar sujeto a los siguientes Términos y Condiciones de Uso. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar el sistema.
+                </p>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">2. Uso del Sistema</h2>
+                <p class="mb-4">
+                    AncaneSoft es una herramienta de software diseñada para facilitar el agendamiento y gestión de citas odontológicas y médicas. Al utilizar el Sistema, usted se compromete a:
+                </p>
+                <ul class="list-disc pl-6 mb-6 space-y-2">
+                    <li>Proporcionar información veraz y actualizada sobre los pacientes y las citas.</li>
+                    <li>Mantener la confidencialidad de sus credenciales de acceso (usuario y contraseña). Usted es responsable de toda actividad que ocurra bajo su cuenta.</li>
+                    <li>No utilizar el sistema para fines ilegales, fraudulentos o no autorizados.</li>
+                </ul>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">3. Propiedad Intelectual</h2>
+                <p class="mb-6">
+                    El código fuente, diseño, logotipos y arquitectura del Sistema son propiedad exclusiva de AncaneSoft y sus desarrolladores. Usted tiene una licencia limitada, no exclusiva e intransferible para usar el software según los planes contratados. No se permite la ingeniería inversa, copia o distribución del código del sistema sin autorización explícita.
+                </p>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">4. Responsabilidad de la Información Médica</h2>
+                <p class="mb-4">
+                    AncaneSoft actúa como un intermediario tecnológico para la gestión de la agenda de la clínica. No somos responsables por:
+                </p>
+                <ul class="list-disc pl-6 mb-6 space-y-2">
+                    <li>La precisión de los datos ingresados por las secretarias, recepcionistas o doctores.</li>
+                    <li>Decisiones médicas o tratamientos derivados de la información almacenada en el sistema.</li>
+                    <li>La falta de asistencia de los pacientes a las citas programadas.</li>
+                </ul>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">5. Disponibilidad del Servicio</h2>
+                <p class="mb-6">
+                    Nos esforzamos por mantener el Sistema operativo el 99% del tiempo. Sin embargo, no garantizamos que el servicio será ininterrumpido o libre de errores. Es posible que el Sistema no esté disponible temporalmente debido a mantenimientos programados o actualizaciones de seguridad.
+                </p>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">6. Terminación del Servicio</h2>
+                <p class="mb-6">
+                    Nos reservamos el derecho de suspender o cancelar su acceso al Sistema en caso de incumplimiento de estos Términos y Condiciones, o falta de pago (si aplica), previa notificación a la clínica o administrador principal. En caso de terminación, se le otorgará un período prudencial para exportar la base de datos de sus pacientes.
+                </p>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">7. Modificaciones</h2>
+                <p class="mb-6">
+                    AncaneSoft se reserva el derecho de modificar o reemplazar estos Términos en cualquier momento. Si una revisión es material, intentaremos avisar con al menos 30 días de antelación antes de que los nuevos términos entren en vigor.
+                </p>
+
+                <h2 class="text-brand-secondary font-bold text-headline-sm mb-4">8. Contacto</h2>
+                <p class="mb-4">
+                    Para cualquier consulta técnica o legal relacionada con el uso de este software, comuníquese con nuestro equipo de soporte:
+                </p>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="mb-1">
+                        <span class="material-symbols-outlined text-sm align-middle mr-2 text-brand-primary">mail</span>
+                        <strong>Correo electrónico:</strong> <a href="mailto:neyserrano2001@gmail.com" class="text-brand-primary hover:underline">neyserrano2001@gmail.com</a>
+                    </p>
+                    <p>
+                        <span class="material-symbols-outlined text-sm align-middle mr-2 text-brand-primary">call</span>
+                        <strong>Teléfono:</strong> <a href="tel:+573104010112" class="text-brand-primary hover:underline">+57 310 401 0112</a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center border-t border-gray-100 pt-8">
+                <a href="{% url 'login' %}" class="inline-flex justify-center py-3 px-8 border border-transparent rounded-lg shadow-sm text-label-lg font-bold text-white bg-brand-primary hover:bg-brand-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-transform active:scale-95">
+                    Ir a iniciar sesión
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

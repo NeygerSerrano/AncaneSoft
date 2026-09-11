@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block dynamic_colors %}
+<style>
+    :root {
+        --color-primary: #1d8797;
+        --color-secondary: #0f3856;
+    }
+</style>
+{% endblock dynamic_colors %}
+
+{% block title %}Página no encontrada | AncaneSoft{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop bg-gray-50">
+<main class="w-full max-w-[1024px] bg-white rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row">
+    <!-- Left Side: Branding / Visual -->
+    <div class="hidden md:flex flex-col justify-between w-1/2 text-white p-12 relative overflow-hidden group bg-brand-secondary">
+        <div class="relative z-10 flex flex-col items-center text-center">
+            <img alt="Logotipo de AncaneSoft" class="h-48 w-auto mb-8 rounded-md" src="{% static 'agendamiento/img/AncaneSoftv2.webp' %}">
+            <h1 class="font-headline-lg text-headline-lg text-white mb-4">AncaneSoft.</h1>
+            <p class="font-body-lg text-body-lg text-white">Sistema de agendamiento de citas.</p>
+        </div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
+        <div class="absolute -top-12 -left-12 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+    </div>
+    
+    <!-- Right Side: 404 Content -->
+    <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center text-center bg-white">
+        <!-- Mobile Header Logo (visible only on small screens) -->
+        <div class="md:hidden flex items-center justify-center mb-8">
+            <img alt="Logotipo de AncaneSoft" class="h-32 w-auto rounded-md" src="{% static 'agendamiento/img/AncaneSoftv2.webp' %}">
+        </div>
+        
+        <div class="mb-6 text-brand-primary">
+            <span class="material-symbols-outlined text-[80px]" style="font-variation-settings: 'FILL' 0, 'wght' 200;">explore_off</span>
+        </div>
+        
+        <h2 class="font-headline-lg text-[40px] font-bold text-brand-secondary mb-2">404</h2>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">Página no encontrada</h3>
+        
+        <p class="text-body-md text-on-surface-variant mb-8 max-w-sm">
+            Lo sentimos, la página que estás buscando no existe, ha sido movida o está temporalmente fuera de servicio.
+        </p>
+        
+        <a href="{% url 'dashboard' %}" class="w-full md:w-auto flex justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-label-lg font-bold text-white bg-brand-primary hover:bg-brand-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary transition-colors">
+            Volver al inicio
+        </a>
+    </div>
+</main>
+</div>
+{% endblock content %}

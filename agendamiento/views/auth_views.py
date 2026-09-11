@@ -74,6 +74,13 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 
+                # Manejo de "Recuérdame" (Cookies por 7 días)
+                remember_me = request.POST.get('remember_me')
+                if remember_me:
+                    request.session.set_expiry(604800) # 7 días en segundos
+                else:
+                    request.session.set_expiry(0) # Se cierra al cerrar el navegador
+                
                 if user.rol and user.rol.nombre_rol == 'Secretaria':
                     return redirect('dashboard') 
                 elif user.rol and user.rol.nombre_rol == 'Recepcionista':
